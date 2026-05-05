@@ -1,45 +1,80 @@
-from __future__ import annotations
-
+import numpy as np
 from typing import Callable
 
-import numpy as np
+
+def linear(x):
+    """Linear (identity) activation"""
+    return x
 
 
-def relu(x: np.ndarray) -> np.ndarray:
-    return np.maximum(0.0, x)
+def relu(x):
+    """Rectified Linear Unit"""
+    return np.maximum(0, x)
 
 
-def sigmoid(x: np.ndarray) -> np.ndarray:
-    return 1.0 / (1.0 + np.exp(-x))
+def leaky_relu(x, alpha=0.01):
+    """Leaky Rectified Linear Unit"""
+    return np.maximum(x, 0) + alpha * np.minimum(x, 0)
 
 
-def tanh(x: np.ndarray) -> np.ndarray:
+def elu(x, alpha=1.0):
+    """Exponential Linear Unit"""
+    return np.where(x > 0, x, alpha * (np.exp(x) - 1))
+
+
+def sigmoid(x):
+    """Sigmoid activation"""
+    x_clipped = np.clip(x, -500, 500)
+    return 1 / (1 + np.exp(-x_clipped))
+
+
+def tanh(x):
+    """Hyperbolic tangent"""
     return np.tanh(x)
 
 
-def softmax(x: np.ndarray) -> np.ndarray:
-    x = np.asarray(x, dtype=np.float64)
+def softmax(x):
+    """Numerically stable softmax for multi-class classification"""
     shifted = x - np.max(x, axis=-1, keepdims=True)
     exp_x = np.exp(shifted)
     return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
 
-
-ACTIVATIONS: dict[str, Callable[[np.ndarray], np.ndarray]] = {
-    "relu": relu,
-    "sigmoid": sigmoid,
-    "tanh": tanh,
-    "softmax": softmax,
-    "linear": lambda x: x,
-    "identity": lambda x: x,
-    "none": lambda x: x,
+ACTIVATIONS: dict[str, Callable] = {
+    "linear":     linear,
+    "identity":   linear,
+    "none":       linear,
+    "relu":       relu,
+    "leaky_relu": leaky_relu,
+    "elu":        elu,
+    "sigmoid":    sigmoid,
+    "tanh":       tanh,
+    "softmax":    softmax,
 }
 
 
-def get_activation(name: str | None) -> Callable[[np.ndarray], np.ndarray]:
-    if name is None:
-        return ACTIVATIONS["linear"]
+def get_activation(name: str | Callable | None) -> Callable:
+    """Resolve an activation by name, callable, or ``None`` (→ linear).
 
+    Parameters
+    ----------
+    name:
+        - ``None`` or ``'linear'`` / ``'none'`` → identity passthrough
+        - A string key from the ``ACTIVATIONS`` registry
+        - A callable — returned as-is (allows injecting custom activations)
+
+    Raises
+    ------
+    ValueError
+        If ``name`` is a string not present in the registry.
+    """
+    if name is None:
+        return linear
+    if callable(name):
+        return name
     key = name.lower()
     if key not in ACTIVATIONS:
-        raise ValueError(f"Unknown activation: {name}. Available: {sorted(ACTIVATIONS)}")
+        raise ValueError(
+            f"Unknown activation: {name!r}. "
+            f"Available: {sorted(ACTIVATIONS)}"
+        )
     return ACTIVATIONS[key]

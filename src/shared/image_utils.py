@@ -65,8 +65,7 @@ def extract_and_save_features(
     out_path:
         Destination ``.npy`` file for the feature array ``(N, feature_dim)``.
     index_map_path:
-        Optional path for a ``{filename: index}`` JSON mapping consumed by
-        Dev C's training pipeline.  Basename of each path is used as key.
+        Optional path for a ``{filename: index}`` JSON mapping.
     skip_if_exists:
         When *True* (default) and ``out_path`` already exists, load and return
         the cached array instead of re-running extraction.
