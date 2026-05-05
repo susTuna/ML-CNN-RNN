@@ -1,0 +1,28 @@
+# Virtual Environment
+.venv/
+
+# Data & Datasets (Nested Rules)
+data/flickr8k/*
+!data/flickr8k/.gitkeep
+
+data/intel/*
+!data/intel/.gitkeep
+
+# Models & Weights (Nested Rules)=
+models/cnn/*
+!models/cnn/.gitkeep
+
+models/lstm/*
+!models/lstm/.gitkeep
+
+models/rnn/*
+!models/rnn/.gitkeep
+
+# Python & Caching
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
