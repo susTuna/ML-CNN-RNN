@@ -3,7 +3,7 @@
 
 **Deadline:** Jumat, 15 Mei 2026  
 **Tim:** 3 Orang  
-**Total Pekerjaan:** CNN (image classification) + RNN/LSTM (image captioning) + Bonus (ALL)
+**Total Pekerjaan:** CNN (image classification) + RNN/LSTM (image captioning) + Bonus (semua)
 
 ---
 
@@ -11,11 +11,33 @@
 
 | Anggota | Domain Utama | File Utama |
 |---------|-------------|------------|
-| **Dev A** | CNN — layers from scratch, training, evaluasi, Grad-CAM bonus | `src/cnn/`, `src/shared/` |
-| **Dev B** | RNN/LSTM — layers from scratch, decoder, beam search bonus | `src/rnn_lstm/layers.py`, `src/rnn_lstm/decoder.py`, `src/rnn_lstm/beam_search.py` |
-| **Dev C** | RNN/LSTM — training pipeline, caption preprocessing, evaluasi, laporan | `src/rnn_lstm/model.py`, `src/rnn_lstm/train.py`, `src/rnn_lstm/evaluate.py`, `doc/` |
+| **Dev A** | CNN — layers from scratch, training, evaluasi, Grad-CAM bonus | `src/cnn/conv2d.py`, `src/cnn/locally_connected.py`, `src/cnn/pooling.py`, `src/cnn/flatten.py`, `src/cnn/scratch_model.py`, `src/cnn/model.py`, `src/cnn/train.py`, `src/shared/` |
+| **Dev B** | RNN/LSTM — layers from scratch, decoder, beam search bonus | `src/rnn_lstm/embedding.py`, `src/rnn_lstm/rnn.py`, `src/rnn_lstm/lstm.py`, `src/rnn_lstm/decoder.py`, `src/rnn_lstm/beam_search.py` |
+| **Dev C** | RNN/LSTM — training pipeline, caption preprocessing, evaluasi, laporan | `src/rnn_lstm/caption_preprocessing.py`, `src/rnn_lstm/model.py`, `src/rnn_lstm/model_init_inject.py`, `src/rnn_lstm/train.py`, `src/rnn_lstm/metrics.py`, `src/rnn_lstm/evaluate.py`, `doc/` |
 
 > **Shared responsibilities:** `src/shared/` dikerjakan bersama di hari 1-2 sebagai fondasi bersama. Backward propagation bonus dibagi rata setelah forward propagation selesai.
+
+**Notebook:** Semua eksperimen dan pengujian dikerjakan dalam satu file `src/notebooks/notebook.ipynb`, dengan section per domain.
+
+---
+
+## Struktur Notebook
+
+```
+src/notebooks/notebook.ipynb
+  §1  Setup & Shared Utilities
+  §2  CNN — Training (hyperparameter sweep)
+  §3  CNN — From Scratch & Evaluation
+  §4  CNN — Grad-CAM [Bonus]
+  §5  RNN/LSTM — Feature Extraction + Caption Preprocessing
+  §6  RNN/LSTM — Training (RNN & LSTM variants)
+  §7  RNN/LSTM — From Scratch & Evaluation
+  §8  RNN/LSTM — Beam Search / Init-Inject [Bonus]
+```
+
+Dev A mengerjakan §1–4, Dev B membantu §7–8 (scratch inference), Dev C mengerjakan §5–7 (training & evaluasi).
+
+---
 
 ---
 
@@ -45,7 +67,8 @@ Kerjakan bersama Dev B dan Dev C:
 ---
 
 ## [CNN Bagian 1] Utility Functions
-**File:** `src/shared/image_utils.py`
+**File:** `src/shared/image_utils.py`  
+**Notebook:** `§1 Setup & Shared Utilities`
 
 - [ ] `load_image(path, target_size=(224,224))`: `PIL.Image.open` → resize → `np.array` → `/255.0`, handle mode RGB
 - [ ] `load_batch(paths, target_size)`: loop `load_image`, stack ke `(N, H, W, C)`
@@ -54,28 +77,52 @@ Kerjakan bersama Dev B dan Dev C:
 ---
 
 ## [CNN Bagian 2] Forward Propagation From Scratch
-**File:** `src/cnn/layers.py` — NumPy only, DILARANG import TF/Keras  
+**File:** (decoupled — lihat bawah) — NumPy only, DILARANG import TF/Keras  
+**Notebook:** `§3 CNN — From Scratch & Evaluation`  
 **Referensi:** d2l.ai Conv chapter, CS231n notes
 
-### `Conv2DLayer`
+> **Struktur file (decoupled):**
+> ```
+> src/cnn/
+> ├── conv2d.py             ← Conv2DLayer
+> ├── locally_connected.py  ← LocallyConnected2DLayer
+> ├── pooling.py            ← MaxPooling2DLayer, AveragePooling2DLayer,
+> │                              GlobalAveragePooling2DLayer, GlobalMaxPooling2DLayer
+> ├── flatten.py            ← FlattenLayer
+> ├── scratch_model.py      ← CNNScratchModel
+> ├── layers.py             ← shim: re-export semua kelas di atas
+> ├── __init__.py           ← re-export package-level
+> ├── model.py              ← Keras training model (DEV A Bagian 3)
+> ├── train.py              ← training pipeline (DEV A Bagian 3)
+> └── gradcam.py            ← Grad-CAM [BONUS]
+> ```
+> `layers.py` hanya berisi `from .conv2d import ...` dst.
+> — tidak ada logika di sana — untuk menjaga kompatibilitas dengan spec.
+
+### `Conv2DLayer` — `src/cnn/conv2d.py`
 Load `layer.get_weights()` → `[kernel (kH,kW,C_in,C_out), bias (C_out,)]`
 - [ ] Sliding window forward: setiap posisi `(i,j)` dan filter `k`: dot product patch vs `kernel[:,:,:,k]` + `bias[k]` → aktivasi
 - [ ] Handle `padding='same'` dan `padding='valid'`, arbitrary `strides`
+- [ ] `from_keras_layer(keras_layer)` classmethod
 
-### `LocallyConnected2DLayer`
+### `LocallyConnected2DLayer` — `src/cnn/locally_connected.py`
 Load kernel shape `(out_rows*out_cols, kH*kW*C_in, C_out)` — non-shared, tiap posisi punya kernel sendiri
 - [ ] Forward: posisi `(i,j)` → gunakan `kernel[i*out_cols+j]`
+- [ ] `from_keras_layer(keras_layer)` classmethod
 
-### `MaxPooling2DLayer` / `AveragePooling2DLayer`
+### `MaxPooling2DLayer` / `AveragePooling2DLayer` — `src/cnn/pooling.py`
 - [ ] Sliding window, `pool_size` dan `strides`, `np.max`/`np.mean` per channel
+- [ ] `from_keras_layer(keras_layer)` classmethod untuk masing-masing
 
-### `GlobalAveragePooling2DLayer` / `GlobalMaxPooling2DLayer`
+### `GlobalAveragePooling2DLayer` / `GlobalMaxPooling2DLayer` — `src/cnn/pooling.py`
 - [ ] `(H,W,C)` → `(C,)` via `np.mean(x, axis=(0,1))` atau `np.max`
+- [ ] `from_keras_layer(keras_layer)` classmethod untuk masing-masing
 
-### `FlattenLayer`
+### `FlattenLayer` — `src/cnn/flatten.py`
 - [ ] `x.flatten(order='C')` — row-major, konsisten Keras
+- [ ] `from_keras_layer(keras_layer)` classmethod
 
-### `CNNScratchModel`
+### `CNNScratchModel` — `src/cnn/scratch_model.py`
 - [ ] `load_from_keras(keras_model)` — iterasi layer Keras, buat layer scratch yang sesuai
 - [ ] `forward(x)` — jalankan layer secara sekuensial
 
@@ -83,7 +130,7 @@ Load kernel shape `(out_rows*out_cols, kH*kW*C_in, C_out)` — non-shared, tiap 
 
 ## [CNN Bagian 3] Training Keras
 **File:** `src/cnn/model.py`, `src/cnn/train.py`  
-**Notebook:** `01_cnn_training.ipynb`  
+**Notebook:** `§2 CNN — Training`  
 **Dataset:** Intel Image Classification (25k gambar, 6 kelas)
 
 Arsitektur baseline: `Input → [Conv2D → MaxPool] × N → GlobalAvgPool → Dense(128) → Dense(6, softmax)`  
@@ -100,7 +147,7 @@ Simpan semua bobot ke `models/cnn/`, catat macro F1 dan training history `.json`
 ---
 
 ## [CNN Bagian 4] Evaluasi
-**Notebook:** `02_cnn_scratch_eval.ipynb`
+**Notebook:** `§3 CNN — From Scratch & Evaluation`
 
 - [ ] Load arsitektur terbaik → jalankan `CNNScratchModel.forward()` pada test set → bandingkan macro F1 vs Keras
 - [ ] Ganti Conv2D dengan `LocallyConnected2DLayer` → jalankan ulang
@@ -111,6 +158,7 @@ Simpan semua bobot ke `models/cnn/`, catat macro F1 dan training history `.json`
 
 ## [BONUS] Grad-CAM + Feature Map Visualization
 **File:** `src/cnn/gradcam.py`  
+**Notebook:** `§4 CNN — Grad-CAM`  
 **Referensi:** Selvaraju et al. 2016
 
 - [ ] `get_intermediate_feature_maps(model, image, layer_names)` — visualisasi activation maps
@@ -131,14 +179,21 @@ Simpan semua bobot ke `models/cnn/`, catat macro F1 dan training history `.json`
 src/shared/image_utils.py
 src/shared/activations.py
 src/shared/dense_layer.py
-src/cnn/layers.py
-src/cnn/model.py
+src/shared/__init__.py
+src/cnn/conv2d.py             (Conv2DLayer)
+src/cnn/locally_connected.py  (LocallyConnected2DLayer)
+src/cnn/pooling.py            (MaxPooling2DLayer, AveragePooling2DLayer,
+                               GlobalAveragePooling2DLayer, GlobalMaxPooling2DLayer)
+src/cnn/flatten.py            (FlattenLayer)
+src/cnn/scratch_model.py      (CNNScratchModel)
+src/cnn/layers.py            ← shim re-export (backward compat)
+src/cnn/__init__.py           (package-level re-exports)
+src/cnn/model.py              (Keras training model)
 src/cnn/train.py
-src/cnn/gradcam.py          [BONUS]
-src/notebooks/01_cnn_training.ipynb
-src/notebooks/02_cnn_scratch_eval.ipynb
-models/cnn/*.weights.h5     (12+ model files)
-outputs/cnn/                (plots, F1 tables, Grad-CAM images)
+src/cnn/gradcam.py            [BONUS]
+models/cnn/*.weights.h5       (12+ model files)
+outputs/cnn/                  (plots, F1 tables, Grad-CAM images)
+notebook.ipynb §1, §2, §3, §4
 ```
 
 ---
@@ -160,53 +215,77 @@ Sama dengan Dev A — kerjakan `src/shared/` bersama.
 ---
 
 ## [RNN/LSTM Bagian 0] Forward Propagation From Scratch
-**File:** `src/rnn_lstm/layers.py` — NumPy only  
+**File:** (decoupled — lihat bawah) — NumPy only  
+**Notebook:** `§7 RNN/LSTM — From Scratch & Evaluation`  
 **Referensi:** d2l.ai RNN/LSTM from Scratch, Keras weight format docs
 
-### `EmbeddingLayer`
+> **Struktur file (decoupled):**
+> ```
+> src/rnn_lstm/
+> ├── embedding.py   ← EmbeddingLayer
+> ├── rnn.py         ← SimpleRNNCell, SimpleRNNLayer
+> ├── lstm.py        ← LSTMCell, LSTMLayer
+> ├── layers.py      ← shim: re-export semua kelas di atas
+> └── __init__.py    ← re-export package-level
+> ```
+> `layers.py` hanya berisi `from .embedding import ...` dst.
+> — tidak ada logika di sana — untuk menjaga kompatibilitas dengan spec.
+
+### `EmbeddingLayer` — `src/rnn_lstm/embedding.py`
 Load `layer.get_weights()[0]` → matrix `(vocab_size, embed_dim)`
 - [ ] `forward(token_ids)`: `return self.embedding_matrix[token_ids]`
 - [ ] Support shape `(seq_len,)` dan `(batch, seq_len)`
+- [ ] `from_keras_layer(keras_layer)` classmethod
 
-### `SimpleRNNCell`
+### `SimpleRNNCell` — `src/rnn_lstm/rnn.py`
 Load `layer.get_weights()` → `[W_x (input_dim, hidden_dim), W_h (hidden_dim, hidden_dim), b (hidden_dim,)]`
 - [ ] `forward(x_t, h_prev)`: `return np.tanh(x_t @ W_x + h_prev @ W_h + b)`
+- [ ] `from_keras_weights(keras_weights)` / `from_keras_layer(keras_layer)` classmethods
 
-### `LSTMCell`
-Load `layer.get_weights()` → `[kernel (input_dim, 4*hidden_dim), recurrent_kernel (hidden_dim, 4*hidden_dim), bias (4*hidden_dim,)]`
-Urutan gate Keras: `i, f, c, o`
+### `SimpleRNNLayer` — `src/rnn_lstm/rnn.py`
+Wrapper iterasi timestep di atas satu atau lebih `SimpleRNNCell`:
+- [ ] `forward(x_seq, h0=None)` — x_seq shape `(seq_len, input_dim)`
+- [ ] Support `return_sequences=True` dan `False`
+- [ ] Support stacking (deep RNN) — list of cells
+- [ ] `from_keras_layer()` / `from_keras_layers()` classmethods
+
+### `LSTMCell` — `src/rnn_lstm/lstm.py`
+Load `layer.get_weights()` → `[kernel (input_dim, 4*hidden_dim), recurrent_kernel (hidden_dim, 4*hidden_dim), bias (4*hidden_dim,)]`  
+Urutan gate Keras: `i, f, g, o`
 - [ ] Split gates: `i = sigmoid(...)`, `f = sigmoid(...)`, `g = tanh(...)`, `o = sigmoid(...)`
 - [ ] `c_t = f * c_prev + i * g`
 - [ ] `h_t = o * tanh(c_t)`
-- [ ] `forward(x_t, h_prev, c_prev) -> (h_t, c_t)`
+- [ ] `forward(x_t, h_prev, c_prev) -> (h_t, c_t)` — supports batch `(N, dim)` naturally
+- [ ] `from_keras_weights(keras_weights)` / `from_keras_layer(keras_layer)` classmethods
 
-### `SimpleRNNLayer` / `LSTMLayer`
-Wrapper iterasi timestep:
+### `LSTMLayer` — `src/rnn_lstm/lstm.py`
+Wrapper iterasi timestep di atas satu atau lebih `LSTMCell`:
 - [ ] `forward(x_seq, h0=None, c0=None)` — x_seq shape `(seq_len, input_dim)`
 - [ ] Support `return_sequences=True` dan `False`
-- [ ] Support stacking (deep RNN/LSTM) — list of cells
+- [ ] Support stacking (deep LSTM) — list of cells
+- [ ] `from_keras_layer()` / `from_keras_layers()` classmethods
 
 ---
 
 ## [RNN/LSTM Bagian 4] Decoder Inference Pipeline From Scratch
-**File:** `src/rnn_lstm/decoder.py`
+**File:** `src/rnn_lstm/decoder.py`  
+**Notebook:** `§7 RNN/LSTM — From Scratch & Evaluation`
 
 ```
-ImageCaptionerScratch:
-  generate_caption(image_path, max_len=20):
-    1. load_image → preprocess
-    2. extract CNN feature (Keras frozen encoder, numpy output)
-    3. x_{-1} = dense_proj.forward(cnn_feat)   [pre-inject]
-    4. h0=zeros, c0=zeros
-    5. run x_{-1} through LSTM → updated hidden state
-    6. token = <start>
-    7. loop max_len:
-       x_t = embedding.forward(token)
-       h_t = rnn/lstm.forward(x_t, h_prev)
-       logits = dense_out.forward(h_t)
-       token = argmax(softmax(logits))
-       if token == <end>: break
-    8. decode token ids → words
+ImageCaptionerScratch.generate_caption(image_path, max_len):
+  1. load_image → preprocess
+  2. extract CNN feature (Keras frozen encoder, numpy output)
+  3. x_{-1} = dense_proj.forward(cnn_feat)   [pre-inject]
+  4. h0=zeros, c0=zeros
+  5. run x_{-1} through RNN/LSTM → updated hidden state
+  6. token = <start>
+  7. loop max_len:
+     x_t = embedding.forward(token)
+     h_t = rnn/lstm.forward(x_t, h_prev)
+     logits = dense_out.forward(h_t)
+     token = argmax(softmax(logits))
+     if token == <end>: break
+  8. decode token ids → words
 ```
 
 - [ ] `load_from_keras(keras_model)` — auto-load semua bobot per layer
@@ -217,6 +296,7 @@ ImageCaptionerScratch:
 
 ## [BONUS] Beam Search Decoder
 **File:** `src/rnn_lstm/beam_search.py`  
+**Notebook:** `§8 RNN/LSTM — Beam Search / Init-Inject`  
 **Referensi:** d2l.ai Beam Search
 
 - [ ] `beam_search_decode(captioner, image_path, k=5, max_len=20)`:
@@ -229,18 +309,16 @@ ImageCaptionerScratch:
 ---
 
 ## [BONUS] Batch Inference From Scratch
-**Koordinasi:** Dev A (CNN layers) dan Dev C (evaluasi)
-
 - [ ] Modifikasi `Conv2DLayer.forward(x)`: handle shape `(N, H, W, C)`
 - [ ] Modifikasi `EmbeddingLayer.forward(token_ids)`: handle `(N, seq_len)`
-- [ ] Modifikasi `LSTMCell.forward(x_t, h_prev, c_prev)`: handle `(N, dim)` — matrix ops handle ini secara natural
+- [ ] Modifikasi `LSTMCell.forward(x_t, h_prev, c_prev)`: handle `(N, dim)`
 - [ ] Tambahkan parameter `batch_size` ke semua entry-point inference
 - [ ] Verifikasi output batch identik dengan loop sequential
 
 ---
 
 ## [BONUS] Backward Propagation — RNN/LSTM
-- [ ] `SimpleRNNCell.backward(grad_h)` → `grad_x`, `grad_W_x`, `grad_W_h`, `grad_b`, `grad_h_prev` — BPTT satu step
+- [ ] `SimpleRNNCell.backward(grad_h)` → `grad_x`, `grad_W_x`, `grad_W_h`, `grad_b`, `grad_h_prev`
 - [ ] `LSTMCell.backward(grad_h, grad_c)` → semua gradient via chain rule melalui gates
 - [ ] `EmbeddingLayer.backward(grad_out, token_ids)` → accumulate gradient ke embedding matrix
 
@@ -248,10 +326,14 @@ ImageCaptionerScratch:
 
 ## Output Dev B
 ```
-src/rnn_lstm/layers.py               (EmbeddingLayer, SimpleRNNCell, LSTMCell, wrappers)
+src/rnn_lstm/embedding.py            (EmbeddingLayer)
+src/rnn_lstm/rnn.py                  (SimpleRNNCell, SimpleRNNLayer)
+src/rnn_lstm/lstm.py                 (LSTMCell, LSTMLayer)
+src/rnn_lstm/layers.py              ← shim re-export (backward compat)
+src/rnn_lstm/__init__.py             (package-level re-exports)
 src/rnn_lstm/decoder.py              (ImageCaptionerScratch, greedy decode)
 src/rnn_lstm/beam_search.py          [BONUS]
-src/notebooks/04_rnn_lstm_scratch_eval.ipynb  (bersama Dev C)
+notebook.ipynb §7, §8               (bersama Dev C)
 ```
 
 ---
@@ -273,6 +355,7 @@ Sama dengan Dev A dan Dev B.
 ---
 
 ## [RNN/LSTM Bagian 1] Feature Extraction
+**Notebook:** `§5 RNN/LSTM — Feature Extraction + Caption Preprocessing`  
 Bergantung pada `extract_and_save_features` dari Dev A.
 
 - [ ] Jalankan extraction seluruh Flickr8k (8.092 gambar) dengan InceptionV3 atau VGG16 tanpa top layer, bobot ImageNet, frozen
@@ -282,7 +365,8 @@ Bergantung pada `extract_and_save_features` dari Dev A.
 ---
 
 ## [RNN/LSTM Bagian 2] Caption Preprocessing
-**File:** `src/rnn_lstm/caption_preprocessing.py`
+**File:** `src/rnn_lstm/caption_preprocessing.py`  
+**Notebook:** `§5 RNN/LSTM — Feature Extraction + Caption Preprocessing`
 
 - [ ] `preprocess_captions(captions_file)`: lowercase, hapus tanda baca (`re.sub`), tambahkan `<start>` dan `<end>`
 - [ ] `build_vocabulary(captions_train, min_freq=2)`: hitung frekuensi, filter, tambah special tokens `<pad>=0, <start>=1, <end>=2, <unk>=3`
@@ -293,8 +377,19 @@ Bergantung pada `extract_and_save_features` dari Dev A.
 
 ## [RNN/LSTM Bagian 3] Training Keras Decoder
 **File:** `src/rnn_lstm/model.py`, `src/rnn_lstm/train.py`  
-**Notebook:** `03_rnn_lstm_training.ipynb`
+**Notebook:** `§6 RNN/LSTM — Training`
 
+> **Struktur file (decoupled):**
+> ```
+> src/rnn_lstm/
+> ├── model.py               ← build_decoder_pre_inject(...) — arsitektur utama
+> ├── model_init_inject.py   ← build_decoder_init_inject(...) [BONUS]
+> ├── train.py               ← training loop + history logging
+> ├── metrics.py             ← compute_bleu4, compute_meteor (pure functions)
+> └── evaluate.py            ← evaluation orchestration (imports metrics.py)
+> ```
+
+### `model.py` — Pre-Inject Decoder
 Arsitektur decoder (pre-inject):
 ```
 Input: [projected_cnn_feat, emb(<start>), emb(S_0), ..., emb(S_{N-1})]  (seq_len+1, embed_dim)
@@ -302,29 +397,37 @@ Input: [projected_cnn_feat, emb(<start>), emb(S_0), ..., emb(S_{N-1})]  (seq_len
 → Dense(vocab_size, softmax)
 Loss: SparseCategoricalCrossentropy, Optimizer: Adam, Teacher Forcing
 ```
+- [ ] `build_decoder_pre_inject(vocab_size, embed_dim, hidden_dim, num_layers, rnn_type)` → Keras model
+
+### `train.py` — Training Pipeline
+- [ ] `train_model(model, train_data, val_data, epochs, ...)` → history dict
+- [ ] Simpan bobot ke `models/rnn/` atau `models/lstm/` sebagai `.weights.h5` + history `.json`
 
 Hyperparameter sweep — SAMA untuk RNN dan LSTM:
 - [ ] **Jumlah layer recurrent** — 3 variasi: 1, 2, 3 layers
 - [ ] **Ukuran hidden state** — 2 variasi: 128, 512
 
-Minimal 6 variasi × 2 decoder = 12 training runs. Simpan ke `models/rnn/` dan `models/lstm/` sebagai `.weights.h5` + history `.json`.
+Minimal 6 variasi × 2 decoder = 12 training runs.
 
 ---
 
 ## [RNN/LSTM Bagian 5] Eksperimen & Evaluasi
-**File:** `src/rnn_lstm/evaluate.py`  
-**Notebook:** `04_rnn_lstm_scratch_eval.ipynb` (bersama Dev B)
+**File:** `src/rnn_lstm/metrics.py`, `src/rnn_lstm/evaluate.py`  
+**Notebook:** `§7 RNN/LSTM — From Scratch & Evaluation` (bersama Dev B)
 
-### Metrik
+### `metrics.py` — Pure Metric Functions
 - [ ] `compute_bleu4(references, hypotheses)` — gunakan `sacrebleu` atau `nltk`
 - [ ] `compute_meteor(references, hypotheses)` — gunakan `nltk.translate.meteor_score`
+
+### `evaluate.py` — Evaluation Orchestration
+Menggunakan `metrics.py` + `decoder.py` dari Dev B.
 
 ### Eksperimen
 
 **a) Variasi jumlah layer dan hidden state:**
 - [ ] Jalankan semua 12 variasi → BLEU-4 dan METEOR pada test set untuk RNN dan LSTM
 - [ ] Plot training/validation loss per epoch setiap variasi
-- [ ] Tabel perbandingan + kesimpulan: pengaruh jumlah layer dan hidden state size
+- [ ] Tabel perbandingan + kesimpulan
 
 **b) Keras vs From Scratch:**
 - [ ] Pilih 1 variasi terbaik per decoder
@@ -344,10 +447,11 @@ Minimal 6 variasi × 2 decoder = 12 training runs. Simpan ke `models/rnn/` dan `
 ---
 
 ## [BONUS] Init-Inject Architecture
-**Tambahkan ke:** `src/rnn_lstm/model.py`  
+**File:** `src/rnn_lstm/model_init_inject.py`  
+**Notebook:** `§8 RNN/LSTM — Beam Search / Init-Inject`  
 **Referensi:** Tanti et al. 2017
 
-- [ ] `build_decoder_init_inject(...)`: image feature sebagai initial hidden state `h0 = Dense(feat_dim → hidden_dim)(image_feature)`, bukan sebagai input awal sequence
+- [ ] `build_decoder_init_inject(vocab_size, embed_dim, hidden_dim, feat_dim, rnn_type)`: image feature sebagai `h0 = Dense(feat_dim → hidden_dim)(image_feature)`, bukan sebagai input awal sequence
 - [ ] Latih satu versi RNN dan satu LSTM dengan init-inject
 - [ ] Bandingkan BLEU-4 dengan pre-inject: tabel + analisis
 
@@ -370,16 +474,17 @@ Minimal 6 variasi × 2 decoder = 12 training runs. Simpan ke `models/rnn/` dan `
 
 ## Output Dev C
 ```
-src/rnn_lstm/caption_preprocessing.py
-src/rnn_lstm/model.py               (pre-inject + init-inject [BONUS])
-src/rnn_lstm/train.py
-src/rnn_lstm/evaluate.py
-src/notebooks/03_rnn_lstm_training.ipynb
-src/notebooks/04_rnn_lstm_scratch_eval.ipynb  (bersama Dev B)
-models/rnn/*.weights.h5             (6+ model files)
-models/lstm/*.weights.h5            (6+ model files)
-outputs/rnn/, outputs/lstm/         (plots, BLEU tables, caption examples)
+src/rnn_lstm/caption_preprocessing.py  (preprocess_captions, build_vocabulary, tokenize_and_pad)
+src/rnn_lstm/model.py                  (build_decoder_pre_inject)
+src/rnn_lstm/model_init_inject.py      (build_decoder_init_inject) [BONUS]
+src/rnn_lstm/train.py                  (train_model, history logging)
+src/rnn_lstm/metrics.py                (compute_bleu4, compute_meteor)
+src/rnn_lstm/evaluate.py               (evaluation orchestration)
+models/rnn/*.weights.h5                (6+ model files)
+models/lstm/*.weights.h5               (6+ model files)
+outputs/rnn/, outputs/lstm/            (plots, BLEU tables, caption examples)
 doc/laporan.pdf
+notebook.ipynb §5, §6, §7             (bersama Dev B untuk §7)
 ```
 
 ---
@@ -394,7 +499,7 @@ doc/laporan.pdf
 | 3–4 | 7–8 Mei | Dev A: CNN from scratch done. Dev B: EmbeddingLayer + LSTMCell done. Dev C: feature extraction + preprocessing selesai. |
 | 5–6 | 9–10 Mei | Dev A: CNN training sweep selesai. Dev B: greedy decoder + beam search done. Dev C: 12 training runs selesai. |
 | 7–8 | 11–12 Mei | Dev A: evaluasi + Grad-CAM. Dev B: batch inference done. Dev C: evaluasi BLEU/METEOR + semua eksperimen. |
-| 9–10 | 13–14 Mei | Dev A+B: backward propagation. Dev C: laporan draft. Review bersama. |
+| 9–10 | 13–14 Mei | Dev A+B: backward propagation. Dev C: laporan draft. Review bersama + merge notebook. |
 | 11 | 15 Mei | Final check + submission via Edunex (NIM terkecil). |
 
 ---
@@ -406,16 +511,25 @@ shared/image_utils.py ──┬──→ cnn/train.py
 shared/activations.py ──┤    rnn_lstm/train.py
 shared/dense_layer.py ──┘    rnn_lstm/decoder.py
 
-cnn/layers.py ──────────────────────→ 02_cnn_scratch_eval.ipynb
-cnn/model.py + cnn/train.py ────────→ 01_cnn_training.ipynb
-cnn/gradcam.py ─────────────────────→ 05_bonus.ipynb [BONUS]
+cnn/conv2d.py ──────────────────────┐
+cnn/locally_connected.py ───────────┤
+cnn/pooling.py ─────────────────────┼──→ cnn/scratch_model.py → notebook §3
+cnn/flatten.py ─────────────────────┘
+cnn/layers.py  (shim) ──────────────→ cnn/scratch_model.py  [alias]
+cnn/model.py + cnn/train.py ────────→ notebook §2
+cnn/gradcam.py ─────────────────────→ notebook §4 [BONUS]
 
-rnn_lstm/layers.py ─────────────────→ rnn_lstm/decoder.py
-rnn_lstm/decoder.py ────────────────→ 04_rnn_lstm_scratch_eval.ipynb
-rnn_lstm/beam_search.py ────────────→ 05_bonus.ipynb [BONUS]
+rnn_lstm/embedding.py ──────────────┐
+rnn_lstm/rnn.py ────────────────────┼──→ rnn_lstm/decoder.py
+rnn_lstm/lstm.py ───────────────────┘
+rnn_lstm/layers.py  (shim) ─────────→ rnn_lstm/decoder.py  [alias]
+rnn_lstm/decoder.py ────────────────→ notebook §7
+rnn_lstm/beam_search.py ────────────→ notebook §8 [BONUS]
 rnn_lstm/caption_preprocessing.py ──→ rnn_lstm/train.py
-rnn_lstm/model.py + train.py ───────→ 03_rnn_lstm_training.ipynb
-rnn_lstm/evaluate.py ───────────────→ 04_rnn_lstm_scratch_eval.ipynb
+rnn_lstm/model.py ──────────────────→ rnn_lstm/train.py → notebook §6
+rnn_lstm/model_init_inject.py ──────→ rnn_lstm/train.py → notebook §8 [BONUS]
+rnn_lstm/metrics.py ────────────────→ rnn_lstm/evaluate.py
+rnn_lstm/evaluate.py ───────────────→ notebook §7
 ```
 
 ---
