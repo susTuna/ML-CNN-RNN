@@ -47,6 +47,7 @@ def beam_search_decode(
         x_proj = cnn_feat
 
     # 2. Run projection step to seed the hidden state
+    h_init = captioner._init_hidden()
     _, h_init = captioner._step(x_proj, h_init)
 
     # 3. Initialise k beams
@@ -123,7 +124,7 @@ def beam_search_decode(
     for t in best_tokens[1:]:          # skip leading <start>
         if t == captioner.end_id:
             break
-        if t != captioner.pad_id:
+        if t != captioner.pad_id and t != captioner.start_id:
             word = captioner.idx2word.get(str(t), captioner.idx2word.get(t, "<unk>"))
             words.append(word)
 
