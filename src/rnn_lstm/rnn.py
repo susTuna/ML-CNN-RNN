@@ -51,7 +51,7 @@ class SimpleRNNCell:
         keras_weights: List[np.ndarray],
     ) -> "SimpleRNNCell":
         """
-        Build from the list returned by ``keras_layer.get_weights()``.
+        Build from the list returned by keras_layer.get_weights().
 
         Parameters
         ----------
@@ -66,8 +66,54 @@ class SimpleRNNCell:
 
     @classmethod
     def from_keras_layer(cls, keras_layer) -> "SimpleRNNCell":
-        """Build from a ``tf.keras.layers.SimpleRNN`` layer object."""
+        """Build from a tf.keras.layers.SimpleRNN layer object."""
         return cls.from_keras_weights(keras_layer.get_weights())
+
+    def backward(
+        self,
+        x_t: np.ndarray,
+        h_prev: np.ndarray,
+        h_t: np.ndarray,
+        grad_h: np.ndarray,
+    ) -> tuple:
+        """
+        Backprop through one RNN timestep.
+
+        Forward:  h_t = tanh(x_t @ W_x + h_prev @ W_h + b)
+
+        Parameters
+        ----------
+        x_t    : np.ndarray, shape (..., input_dim)  — cached forward input
+        h_prev : np.ndarray, shape (..., hidden_dim) — cached previous state
+        h_t    : np.ndarray, shape (..., hidden_dim) — cached output (= tanh(z))
+        grad_h : np.ndarray, shape (..., hidden_dim) — upstream gradient
+
+        Returns
+        -------
+        grad_x      : np.ndarray, shape (..., input_dim)
+        grad_h_prev : np.ndarray, shape (..., hidden_dim)
+        grad_W_x    : np.ndarray, shape (input_dim,  hidden_dim)
+        grad_W_h    : np.ndarray, shape (hidden_dim, hidden_dim)
+        grad_b      : np.ndarray, shape (hidden_dim,)
+        """
+        # Derivative of tanh: d/dz tanh(z) = 1 - tanh(z)^2
+        d_z = grad_h * (1.0 - h_t ** 2)  # (... , hidden_dim)
+
+        # Parameter gradients — sum over batch / seq dims if present
+        if d_z.ndim == 1:
+            grad_W_x = np.outer(x_t, d_z)      # (input_dim,  hidden_dim)
+            grad_W_h = np.outer(h_prev, d_z)   # (hidden_dim, hidden_dim)
+        else:
+            grad_W_x = x_t.T @ d_z             # (input_dim,  hidden_dim)
+            grad_W_h = h_prev.T @ d_z           # (hidden_dim, hidden_dim)
+
+        grad_b = d_z.sum(axis=tuple(range(d_z.ndim - 1))) if d_z.ndim > 1 else d_z
+
+        # Input / state gradients
+        grad_x = d_z @ self.W_x.T              # (..., input_dim)
+        grad_h_prev = d_z @ self.W_h.T         # (..., hidden_dim)
+
+        return grad_x, grad_h_prev, grad_W_x, grad_W_h, grad_b
 
     def __repr__(self) -> str:
         return (
@@ -79,7 +125,7 @@ class SimpleRNNLayer:
     """
     Multi-timestep, optionally stacked SimpleRNN layer.
 
-    Wraps one or more ``SimpleRNNCell`` instances and iterates over the
+    Wraps one or more SimpleRNNCell instances and iterates over the
     time dimension.
 
     Parameters
@@ -87,9 +133,9 @@ class SimpleRNNLayer:
     cells : list of SimpleRNNCell
         Pass a single-element list for a standard (non-deep) RNN.
     return_sequences : bool
-        If ``True``, return every hidden state ``(seq_len, hidden_dim)``.
-        If ``False`` (default), return only the last hidden state
-        ``(hidden_dim,)``.
+        If True, return every hidden state (seq_len, hidden_dim).
+        If False (default), return only the last hidden state
+        (hidden_dim,).
     """
 
     def __init__(
@@ -114,9 +160,9 @@ class SimpleRNNLayer:
         Parameters
         ----------
         x_seq : np.ndarray
-            Shape ``(seq_len, input_dim)`` — single sample.
-            Batch mode ``(seq_len, input_dim)`` is used; batched
-            ``(batch, seq_len, input_dim)`` is handled by transposing
+            Shape (seq_len, input_dim) — single sample.
+            Batch mode (seq_len, input_dim) is used; batched
+            (batch, seq_len, input_dim) is handled by transposing
             so the loop is over time.
         h0 : np.ndarray or None
             Initial hidden state.  Defaults to zeros matching the last
@@ -125,8 +171,8 @@ class SimpleRNNLayer:
         Returns
         -------
         np.ndarray
-            ``(seq_len, hidden_dim)`` if return_sequences else
-            ``(hidden_dim,)``.
+            (seq_len, hidden_dim) if return_sequences else
+            (hidden_dim,).
         """
         # Determine batch mode
         if x_seq.ndim == 3:
@@ -192,13 +238,13 @@ class SimpleRNNLayer:
         return_sequences: Optional[bool] = None,
     ) -> "SimpleRNNLayer":
         """
-        Build from a single ``tf.keras.layers.SimpleRNN`` layer.
+        Build from a single tf.keras.layers.SimpleRNN layer.
 
         Parameters
         ----------
         keras_layer : Keras SimpleRNN layer
         return_sequences : bool or None
-            Overrides the layer's ``return_sequences`` attribute if given.
+            Overrides the layer's return_sequences attribute if given.
         """
         cell = SimpleRNNCell.from_keras_layer(keras_layer)
         rs = (
@@ -222,7 +268,7 @@ class SimpleRNNLayer:
         keras_layers : list of Keras SimpleRNN layers
             Ordered from bottom (input-side) to top.
         return_sequences : bool or None
-            If None, the last layer's ``return_sequences`` attribute is used.
+            If None, the last layer's return_sequences attribute is used.
         """
         cells = [SimpleRNNCell.from_keras_layer(lyr) for lyr in keras_layers]
         rs = (
