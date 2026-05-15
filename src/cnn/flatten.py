@@ -4,21 +4,7 @@ import numpy as np
 
 
 class FlattenLayer:
-    """Row-major flatten, equivalent to Keras Flatten layer."""
-
     def forward(self, x: np.ndarray) -> np.ndarray:
-        """Flatten spatial dimensions to 1D.
-
-        Parameters
-        ----------
-        x : np.ndarray
-            Shape ``(H, W, C)`` for a single image or ``(N, H, W, C)`` for a batch.
-
-        Returns
-        -------
-        np.ndarray
-            Shape ``(H*W*C,)`` or ``(N, H*W*C)``.
-        """
         if x.ndim == 4:
             return x.reshape(x.shape[0], -1)
         return x.flatten(order="C")

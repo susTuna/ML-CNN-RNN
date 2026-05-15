@@ -11,7 +11,6 @@ def _pool2d(
     padding: str,
     reduce_fn: Callable,
 ) -> np.ndarray:
-    """Shared sliding-window pooling logic for Max and Average variants."""
     batched = x.ndim == 4
     if not batched:
         x = x[np.newaxis]  # (1, H, W, C)
@@ -36,7 +35,7 @@ def _pool2d(
             constant_values=fill,
         )
         N, H, W, C = x.shape
-    else:  # 'valid'
+    else:
         out_H = (H - pH) // sH + 1
         out_W = (W - pW) // sW + 1
 
@@ -50,8 +49,6 @@ def _pool2d(
 
 
 class MaxPooling2DLayer:
-    """Max pooling with configurable pool_size, strides, and padding."""
-
     def __init__(
         self,
         pool_size: tuple[int, int] = (2, 2),
@@ -84,8 +81,6 @@ class MaxPooling2DLayer:
 
 
 class AveragePooling2DLayer:
-    """Average pooling with configurable pool_size, strides, and padding."""
-
     def __init__(
         self,
         pool_size: tuple[int, int] = (2, 2),
@@ -118,8 +113,6 @@ class AveragePooling2DLayer:
 
 
 class GlobalAveragePooling2DLayer:
-    """Reduce spatial dims to per-channel mean."""
-
     def forward(self, x: np.ndarray) -> np.ndarray:
         if x.ndim == 4:
             return np.mean(x, axis=(1, 2))
@@ -137,8 +130,6 @@ class GlobalAveragePooling2DLayer:
 
 
 class GlobalMaxPooling2DLayer:
-    """Reduce spatial dims to per-channel max."""
-
     def forward(self, x: np.ndarray) -> np.ndarray:
         if x.ndim == 4:
             return np.max(x, axis=(1, 2))

@@ -8,11 +8,6 @@ from src.shared.activations import get_activation
 
 
 class Conv2DLayer:
-    """2D convolution with shared parameters (NumPy only).
-
-    Loads kernel and bias from a trained Keras Conv2D layer and reproduces
-    the same forward pass using sliding-window dot products.
-    """
 
     def __init__(
         self,
@@ -22,14 +17,13 @@ class Conv2DLayer:
         padding: str = "valid",
         activation: str | Callable | None = None,
     ) -> None:
-        self.kernel = kernel.astype(np.float32)  # (kH, kW, C_in, C_out)
-        self.bias = bias.astype(np.float32)       # (C_out,)
+        self.kernel = kernel.astype(np.float32)
+        self.bias = bias.astype(np.float32)  
         self.strides = strides
         self.padding = padding.lower()
         self.activation_fn = get_activation(activation)
 
         self.kH, self.kW, self.C_in, self.C_out = kernel.shape
-        # Pre-reshape for efficient matmul: (kH*kW*C_in, C_out)
         self._kernel_mat = self.kernel.reshape(-1, self.C_out)
 
     @classmethod
@@ -43,21 +37,9 @@ class Conv2DLayer:
         return cls(kernel, bias, strides, padding, act_name)
 
     def forward(self, x: np.ndarray) -> np.ndarray:
-        """Compute 2D convolution.
-
-        Parameters
-        ----------
-        x : np.ndarray
-            Shape ``(H, W, C_in)`` or ``(N, H, W, C_in)``.
-
-        Returns
-        -------
-        np.ndarray
-            Shape ``(out_H, out_W, C_out)`` or ``(N, out_H, out_W, C_out)``.
-        """
         batched = x.ndim == 4
         if not batched:
-            x = x[np.newaxis]  # (1, H, W, C_in)
+            x = x[np.newaxis]
         N, H, W, C = x.shape
         sH, sW = self.strides
 
@@ -75,7 +57,7 @@ class Conv2DLayer:
                 ((0, 0), (pad_top, pad_bottom), (pad_left, pad_right), (0, 0)),
                 mode="constant",
             )
-        else:  # 'valid'
+        else:
             out_H = (H - self.kH) // sH + 1
             out_W = (W - self.kW) // sW + 1
 
@@ -83,7 +65,7 @@ class Conv2DLayer:
         for i in range(out_H):
             for j in range(out_W):
                 patch = x[:, i * sH : i * sH + self.kH, j * sW : j * sW + self.kW, :]
-                patch_flat = patch.reshape(N, -1)           # (N, kH*kW*C_in)
+                patch_flat = patch.reshape(N, -1) 
                 out[:, i, j, :] = patch_flat @ self._kernel_mat + self.bias
 
         out = self.activation_fn(out)
