@@ -54,22 +54,7 @@ def extract_and_save_features(
     index_map_path: str | Path | None = None,
     skip_if_exists: bool = True,
 ) -> np.ndarray:
-    """Extract CNN features with a frozen Keras encoder and persist them.
 
-    Parameters
-    ----------
-    paths:
-        Ordered iterable of image file paths.
-    keras_encoder:
-        Frozen Keras model used as feature extractor.
-    out_path:
-        Destination ``.npy`` file for the feature array ``(N, feature_dim)``.
-    index_map_path:
-        Optional path for a ``{filename: index}`` JSON mapping.
-    skip_if_exists:
-        When *True* (default) and ``out_path`` already exists, load and return
-        the cached array instead of re-running extraction.
-    """
     import json
 
     out_path = Path(out_path)

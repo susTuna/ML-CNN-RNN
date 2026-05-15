@@ -1,12 +1,3 @@
-"""[BONUS] Init-inject decoder (Tanti et al., 2017).
-
-Same captioning task as the pre-inject decoder, but the projected CNN
-feature is fed as the initial hidden state of the recurrent stack instead
-of as a sequence element. For LSTM we also project to the initial cell
-state. Each layer gets its own projection so hidden_dim can differ from
-feat_dim.
-"""
-
 from .model import (
     masked_sparse_categorical_accuracy,
     masked_sparse_categorical_crossentropy,
@@ -25,10 +16,6 @@ def build_decoder_init_inject(
     dropout=0.0,
     recurrent_dropout=0.0,
 ):
-    """Build and compile a Keras init-inject captioning decoder.
-
-    Output length equals seq_len directly (no image timestep to drop).
-    """
     from tensorflow import keras
     from tensorflow.keras import layers
 
@@ -53,7 +40,6 @@ def build_decoder_init_inject(
 
     x = embedded
     for i in range(num_layers):
-        # one h0 projection per layer (and one c0 if LSTM)
         h0 = layers.Dense(
             hidden_dim, activation="tanh", name="init_h_" + str(i + 1)
         )(image_input)

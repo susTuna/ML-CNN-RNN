@@ -1,15 +1,3 @@
-"""Evaluation pipeline for image caption decoders.
-
-Supports three flavours of generation:
-- Keras greedy: runs the trained Keras model autoregressively on a
-  pre-extracted CNN feature.
-- Scratch greedy: uses ImageCaptionerScratch with a pre-extracted feature.
-- Beam search: same as scratch but with beam search (bonus).
-
-All entry points return BLEU-4, METEOR, captions, and wall-clock time so
-the notebook can build comparison tables.
-"""
-
 import time
 
 import numpy as np
@@ -27,7 +15,6 @@ from .metrics import compute_bleu4, compute_meteor, per_sample_bleu4
 
 
 class EvaluationResult:
-    """Container for one evaluation pass over a split."""
 
     def __init__(
         self,
@@ -61,12 +48,6 @@ class EvaluationResult:
 
 
 def _generate_caption_keras(model, image_feature, idx2word, seq_len, max_len):
-    """Greedy decode for a Keras pre-inject decoder.
-
-    Feed the image feature plus an evolving caption prefix (starts with
-    <start>, the rest is <pad>) and pick argmax of the position matching the
-    most recent real token.
-    """
     feat = image_feature.astype(np.float32)[None, :]  
 
     decoder_input = np.full((1, seq_len), PAD_ID, dtype=np.int32)
@@ -101,10 +82,6 @@ def evaluate_keras_decoder(
     variant="keras",
     progress_cb=None,
 ):
-    """Evaluate a Keras decoder on a (features, image_ids) split.
-
-    features[i] must align with image_ids[i].
-    """
     captions = []
     refs = []
 
@@ -136,14 +113,8 @@ def evaluate_keras_decoder(
 
 
 def _scratch_generate_from_feature(captioner, feature, max_len):
-    """Run ImageCaptionerScratch greedy from a pre-extracted feature vector.
-
-    Mirrors the captioner's own ``generate_caption_greedy`` but skips the CNN
-    encoder step — used when features are cached on disk.
-    """
     cnn_feat = feature.astype(np.float32)
 
-    # project the CNN feature to embed_dim (if the captioner has a projector)
     if captioner.dense_proj is not None:
         x_proj = captioner.dense_proj.forward(cnn_feat).ravel()
     else:
@@ -167,7 +138,6 @@ def _scratch_generate_from_feature(captioner, feature, max_len):
 
     words = []
     for t in generated:
-        # idx2word might be keyed by int or str depending on how it was loaded
         word = captioner.idx2word.get(t, captioner.idx2word.get(str(t), "<unk>"))
         if word == START_TOKEN or word == END_TOKEN or word == PAD_TOKEN:
             continue
@@ -184,7 +154,6 @@ def evaluate_scratch_decoder(
     variant="scratch",
     progress_cb=None,
 ):
-    """Evaluate ImageCaptionerScratch (greedy) on cached features."""
     captions = []
     refs = []
 
@@ -210,11 +179,6 @@ def evaluate_scratch_decoder(
 
 
 def _beam_from_feature(captioner, feature, max_len, beam_width):
-    """Beam search over the scratch captioner's NumPy layers.
-
-    Mirrors the algorithm in src/rnn_lstm/beam_search.py but starts from a
-    pre-extracted feature instead of a raw image.
-    """
     from src.shared.activations import softmax
 
     cnn_feat = feature.astype(np.float32)
@@ -223,11 +187,9 @@ def _beam_from_feature(captioner, feature, max_len, beam_width):
     else:
         x_proj = cnn_feat
 
-    # warm the RNN/LSTM state with the projected image at t = -1
     states0 = captioner._init_hidden()
     _, states0 = captioner._step(x_proj, states0)
 
-    # each beam: (sequence_so_far, log_prob, hidden_states, finished_flag)
     beams = [([captioner.start_id], 0.0, states0, False)]
 
     for _ in range(max_len):
@@ -252,7 +214,6 @@ def _beam_from_feature(captioner, feature, max_len, beam_width):
                 is_finished = (next_token == captioner.end_id)
                 new_beams.append((new_seq, new_log_p, new_states, is_finished))
 
-        # length-normalised score so short beams don't always win
         new_beams.sort(key=lambda b: b[1] / max(len(b[0]), 1), reverse=True)
         beams = new_beams[:beam_width]
 
@@ -281,7 +242,6 @@ def evaluate_beam_decoder(
     variant="beam",
     progress_cb=None,
 ):
-    """Beam search version of evaluate_scratch_decoder."""
     captions = []
     refs = []
 
@@ -307,11 +267,6 @@ def evaluate_beam_decoder(
 
 
 def select_qualitative_examples(result, n_high=4, n_mid=3, n_low=3):
-    """Pick caption examples spanning high / medium / low BLEU-4.
-
-    Returns a list of dicts ready to render in the notebook:
-    {image_id, score, prediction, references}.
-    """
     if len(result.captions) == 0:
         return []
 
@@ -350,16 +305,10 @@ def select_qualitative_examples(result, n_high=4, n_mid=3, n_low=3):
 
 
 def compare_results(results):
-    """Flatten a list of EvaluationResults into row dicts for tabulating."""
     return [r.to_dict() for r in results]
 
 
 def sweep_max_caption_length(eval_fn, max_lens, **eval_kwargs):
-    """Re-run eval_fn for each max_len and tag the variant.
-
-    ``eval_fn`` is one of evaluate_keras_decoder, evaluate_scratch_decoder,
-    or evaluate_beam_decoder. Other keyword arguments are forwarded.
-    """
     results = []
     base_variant = eval_kwargs.pop("variant", "max_len_sweep")
     for L in max_lens:

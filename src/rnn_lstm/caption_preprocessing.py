@@ -1,9 +1,3 @@
-"""Caption preprocessing for Flickr8k image captioning.
-
-Reads the Flickr8k caption file, cleans the text, builds a vocabulary,
-and produces padded integer sequences for teacher-forced decoder training.
-"""
-
 import json
 import re
 from collections import Counter
@@ -11,8 +5,6 @@ from pathlib import Path
 
 import numpy as np
 
-
-# special tokens — fixed positions so the model output indices are stable
 PAD_TOKEN = "<pad>"
 START_TOKEN = "<start>"
 END_TOKEN = "<end>"
@@ -42,38 +34,25 @@ def preprocess_caption(text):
 
 
 def preprocess_captions(captions_source):
-    """Preprocess captions from a Flickr8k file, a dict, or a list of strings.
-
-    - If given a file path, returns {image_filename: [processed_caption, ...]}.
-    - If given a dict {image: [raw_caption, ...]}, returns the same shape but
-      with each caption cleaned and wrapped.
-    - If given a list of strings, returns a list of processed strings.
-    """
-    # file path case
     if isinstance(captions_source, (str, Path)):
         captions_by_image = load_flickr8k_captions(captions_source)
         if len(captions_by_image) > 0:
-            # got Flickr8k style file
             return preprocess_captions(captions_by_image)
 
-        # not Flickr8k format treat each line as one caption
         with open(captions_source, "r", encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
         return preprocess_captions(lines)
 
-    # dict case
     if isinstance(captions_source, dict):
         out = {}
         for image_id, captions in captions_source.items():
             out[image_id] = [preprocess_caption(c) for c in captions]
         return out
 
-    # sequence-of-strings case
     return [preprocess_caption(c) for c in captions_source]
 
 
 def load_flickr8k_captions(captions_path):
-    """Read Flickr8k.token.txt — each line is `image#idx\\tcaption`."""
     captions_path = Path(captions_path)
     captions = {}
 
@@ -94,11 +73,6 @@ def load_flickr8k_captions(captions_path):
 
 
 def build_vocabulary(captions, min_freq=2):
-    """Build a word->id map from the wrapped training captions.
-
-    Words appearing fewer than ``min_freq`` times are dropped (they map to
-    <unk> at encoding time). Special tokens occupy indices 0..3.
-    """
     counter = Counter()
     for caption in captions:
         for token in caption.split():
@@ -111,7 +85,6 @@ def build_vocabulary(captions, min_freq=2):
         word2idx[tok] = i
 
     next_idx = len(SPECIAL_TOKENS)
-    # sort by count desc, then alphabetically so the vocab is reproducible
     sorted_words = sorted(counter.items(), key=lambda kv: (-kv[1], kv[0]))
     for word, count in sorted_words:
         if count < min_freq:
@@ -144,7 +117,6 @@ def pad_sequence(seq, max_len, pad_id=PAD_ID):
 
 
 def tokenize_and_pad(captions, word2idx, max_len=35):
-    """Encode and pad a list of captions to shape (N, max_len)."""
     n = len(captions)
     out = np.full((n, max_len), PAD_ID, dtype=np.int32)
     for i, caption in enumerate(captions):
@@ -155,10 +127,6 @@ def tokenize_and_pad(captions, word2idx, max_len=35):
 
 
 def decode_sequence(ids, idx2word, strip_special=True):
-    """Turn an integer sequence back into a whitespace-joined string.
-
-    Stops at the first <end> token when ``strip_special`` is True.
-    """
     words = []
     for idx in ids:
         idx = int(idx)
@@ -173,11 +141,6 @@ def decode_sequence(ids, idx2word, strip_special=True):
 
 
 def build_training_pairs(sequences):
-    """Split a padded (N, L) batch into decoder input / target arrays.
-
-    decoder_input  = sequences[:, :-1]  (<start> + body)
-    decoder_target = sequences[:,  1:]  (body + <end>)
-    """
     if sequences.ndim != 2 or sequences.shape[1] < 2:
         raise ValueError(
             "sequences must be 2-D with at least 2 columns, got "
@@ -201,7 +164,6 @@ def load_vocabulary(path):
 
 
 def load_flickr8k_split(split_file):
-    """Read a Flickr8k split file (one image filename per line)."""
     with open(split_file, "r", encoding="utf-8") as f:
         return [line.strip() for line in f if line.strip()]
 
@@ -214,11 +176,6 @@ def prepare_dataset(
     word2idx,
     max_len,
 ):
-    """Build (feature, decoder_input, decoder_target) arrays for one split.
-
-    For every (image, caption) pair, the image feature row is repeated once
-    so that all three arrays share the same first dimension.
-    """
     feats = []
     caption_list = []
 

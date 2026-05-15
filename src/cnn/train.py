@@ -1,13 +1,3 @@
-"""Training pipeline for the CNN image classifier (Intel Image Classification).
-
-Drives the spec's 16-architecture hyperparameter sweep:
-    2 (num_conv_layers) x 2 (filter combos) x 2 (kernel sizes) x 2 (pooling)
-
-Saves weights, per-epoch history, and macro F1 per variant so the notebook
-can build comparison tables. Uses the Keras builder from cnn/model.py and
-the MacroF1Callback from there.
-"""
-
 import json
 import time
 from pathlib import Path
@@ -19,7 +9,6 @@ from .model import MacroF1Callback, build_cnn_model
 
 
 class CNNConfig:
-    """Hyperparameter bundle for one CNN training run."""
 
     def __init__(
         self,
@@ -44,7 +33,6 @@ class CNNConfig:
         self.num_classes = num_classes
 
     def variant_name(self):
-        # e.g. "l2_f32-64_k3_max"
         filt_str = "-".join(str(f) for f in self.filters_per_layer[: self.num_conv_layers])
         return (
             "l" + str(self.num_conv_layers)
@@ -77,11 +65,9 @@ def hyperparameter_grid(
     input_shape=(150, 150, 3),
     num_classes=6,
 ):
-    """Spec's 16-architecture sweep — 2 x 2 x 2 x 2 by default."""
     if num_layers_options is None:
         num_layers_options = [2, 4]
     if filter_options is None:
-        # each entry is a list of per-layer filters (must be long enough for max layers)
         filter_options = [
             [32, 64, 128, 256],
             [16, 32, 64, 128],
@@ -112,7 +98,6 @@ def hyperparameter_grid(
 
 
 def _evaluate_macro_f1(model, test_ds):
-    """Run the model on test_ds and return macro F1 + (y_true, y_pred)."""
     y_true = []
     y_pred = []
     for x_batch, y_batch in test_ds:
@@ -135,8 +120,6 @@ def train_cnn_config(
     verbose=1,
     extra_callbacks=None,
 ):
-    """Train one CNN config and return artefacts (model, history, F1, etc.)."""
-    # Translate pooling_type to what build_cnn_model expects
     pooling_arg = "max" if config.pooling_type == "max" else "average"
 
     model = build_cnn_model(
@@ -162,7 +145,6 @@ def train_cnn_config(
     )
     elapsed = time.time() - start
 
-    # Convert history values to plain floats so the JSON is clean
     history_dict = {}
     raw_history = getattr(history, "history", history)
     for key, values in raw_history.items():
@@ -191,7 +173,6 @@ def train_cnn_config(
 
 
 def save_artefacts(artefacts, output_dir):
-    """Persist weights, history JSON, and config JSON to output_dir."""
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -231,12 +212,6 @@ def train_grid(
     output_root=None,
     verbose=1,
 ):
-    """Train every config and return {variant_name: artefacts}.
-
-    When output_root is given, each variant's artefacts are saved under
-    output_root/{variant_name}/ (well — just inside output_root, the variant
-    name is already unique).
-    """
     results = {}
     for config in configs:
         out_dir = None

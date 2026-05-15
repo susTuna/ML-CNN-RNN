@@ -1,5 +1,3 @@
-# Shim — re-exports all layer classes for backward compatibility.
-# No logic here.
 from .conv2d import Conv2DLayer
 from .flatten import FlattenLayer
 from .locally_connected import LocallyConnected2DLayer

@@ -53,20 +53,6 @@ ACTIVATIONS: dict[str, Callable] = {
 
 
 def get_activation(name: str | Callable | None) -> Callable:
-    """Resolve an activation by name, callable, or ``None`` (→ linear).
-
-    Parameters
-    ----------
-    name:
-        - ``None`` or ``'linear'`` / ``'none'`` → identity passthrough
-        - A string key from the ``ACTIVATIONS`` registry
-        - A callable — returned as-is (allows injecting custom activations)
-
-    Raises
-    ------
-    ValueError
-        If ``name`` is a string not present in the registry.
-    """
     if name is None:
         return linear
     if callable(name):

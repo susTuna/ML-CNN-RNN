@@ -1,10 +1,3 @@
-"""BLEU-4 and METEOR metrics for image caption evaluation.
-
-BLEU-4: NLTK corpus-level BLEU with smoothing method 1 (NIST smoothing) so
-short captions don't crash to zero. METEOR: average of NLTK's per-sample
-``meteor_score``. WordNet/punkt data is downloaded on first use.
-"""
-
 import numpy as np
 
 
@@ -13,7 +6,6 @@ def _tokenize(text):
 
 
 def _ensure_nltk_data():
-    """Try to make sure wordnet/punkt are available download if missing."""
     import nltk
 
     needed = [
@@ -25,7 +17,6 @@ def _ensure_nltk_data():
         try:
             nltk.data.find(locator)
         except LookupError:
-            # quiet download if it fails (offline), METEOR will throw later
             try:
                 nltk.download(resource, quiet=True)
             except Exception:
@@ -33,12 +24,6 @@ def _ensure_nltk_data():
 
 
 def compute_bleu4(references, hypotheses):
-    """Corpus-level BLEU-4 with smoothing method 1.
-
-    references: for each sample, a list of one or more reference strings.
-    hypotheses: one predicted string per sample.
-    Returns a float in [0, 1].
-    """
     if len(references) != len(hypotheses):
         raise ValueError(
             "references (" + str(len(references)) + ") and hypotheses ("
@@ -65,7 +50,6 @@ def compute_bleu4(references, hypotheses):
 
 
 def compute_bleu_n(references, hypotheses, n=4):
-    """Generic corpus-level BLEU-n with uniform weights."""
     if n < 1:
         raise ValueError("n must be >= 1")
     if len(references) != len(hypotheses):
@@ -87,7 +71,6 @@ def compute_bleu_n(references, hypotheses, n=4):
 
 
 def compute_meteor(references, hypotheses):
-    """Mean per-sample METEOR over the corpus."""
     if len(references) != len(hypotheses):
         raise ValueError("references and hypotheses must have the same length.")
     if len(hypotheses) == 0:
@@ -103,7 +86,6 @@ def compute_meteor(references, hypotheses):
         try:
             s = float(meteor_score(ref_toks, hyp_toks))
         except Exception:
-            # METEOR can blow up on empty hyp / single token edge cases
             s = 0.0
         scores.append(s)
 
@@ -113,7 +95,6 @@ def compute_meteor(references, hypotheses):
 
 
 def per_sample_bleu4(references, hypotheses):
-    """Per-sample BLEU-4 score — useful for picking qualitative examples."""
     if len(references) != len(hypotheses):
         raise ValueError("references and hypotheses must have the same length.")
 

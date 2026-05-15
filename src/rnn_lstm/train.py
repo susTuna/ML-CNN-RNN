@@ -1,10 +1,3 @@
-"""Training pipeline for the image-caption decoder.
-
-Trains a compiled Keras decoder on (feature, decoder_input, decoder_target)
-arrays and saves weights + per-epoch history + an architecture config so the
-from-scratch implementation can load the same weights later.
-"""
-
 import json
 import time
 from pathlib import Path
@@ -13,8 +6,6 @@ from .model import build_decoder_pre_inject, build_decoder_pre_inject_summary
 
 
 class DecoderConfig:
-    """Hyperparameter bundle for one decoder training run."""
-
     def __init__(
         self,
         rnn_type="lstm",
@@ -66,7 +57,6 @@ class DecoderConfig:
 
 
 def _build_model(config, vocab_size, feat_dim, seq_len):
-    """Pick the right builder based on config.architecture."""
     if config.architecture == "pre_inject":
         return build_decoder_pre_inject(
             vocab_size=vocab_size,
@@ -111,12 +101,6 @@ def train_model(
     callbacks=None,
     **fit_kwargs,
 ):
-    """Train a compiled Keras model and return the history as a plain dict.
-
-    train_data / val_data follow the usual Keras shapes — typically
-    ([features, decoder_input], decoder_target). If output_dir is given,
-    weights and history JSON are persisted there using the model name.
-    """
     fit_options = {"epochs": epochs}
     if val_data is not None:
         fit_options["validation_data"] = val_data
@@ -131,7 +115,6 @@ def train_model(
     history = model.fit(train_data, **fit_options)
     history_dict = _history_to_dict(history)
 
-    # If only output_dir is given, derive both filenames from the model name.
     if output_dir is not None:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -156,14 +139,12 @@ def train_model(
 
 
 def _history_to_dict(history):
-    """Convert a Keras History (or already-dict) into plain Python floats."""
     raw = getattr(history, "history", history)
     if not isinstance(raw, dict):
         raise TypeError("model.fit must return a Keras History or a history dict.")
 
     out = {}
     for metric, values in raw.items():
-        # values is usually a list of floats; sometimes scalar
         try:
             out[str(metric)] = [float(v) for v in values]
         except TypeError:
@@ -172,7 +153,6 @@ def _history_to_dict(history):
 
 
 def _safe_model_stem(model):
-    """Filesystem-friendly stem for a Keras model name."""
     raw_name = str(getattr(model, "name", "") or "model")
     stem = ""
     for ch in raw_name:
@@ -198,12 +178,6 @@ def train_decoder_config(
     verbose=1,
     callbacks=None,
 ):
-    """Train one decoder configuration end-to-end.
-
-    Returns a dict with the trained model, history, elapsed time, and the
-    architecture summary used for the config JSON. When output_dir is set,
-    weights + history + config files are written alongside.
-    """
     if vocab_size is None:
         vocab_size = int(train_decoder_target.max()) + 1
 
@@ -237,7 +211,6 @@ def train_decoder_config(
         num_layers=config.num_layers,
         rnn_type=config.rnn_type,
     )
-    # the summary helper always tags pre_inject — fix it for init-inject runs
     summary["architecture"] = config.architecture
 
     artefacts = {
@@ -256,7 +229,6 @@ def train_decoder_config(
 
 
 def save_artefacts(artefacts, output_dir):
-    """Write weights, history JSON, and architecture config to output_dir."""
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -296,11 +268,6 @@ def hyperparameter_grid(
     epochs=20,
     batch_size=64,
 ):
-    """Build the spec's required hyperparameter sweep.
-
-    Default = 3 layer counts (1/2/3) x 2 hidden sizes (128/512) x 2 decoders
-    (rnn + lstm) = 12 runs.
-    """
     if rnn_types is None:
         rnn_types = ["lstm", "rnn"]
     if num_layers_options is None:
@@ -338,12 +305,6 @@ def train_grid(
     output_root=None,
     verbose=1,
 ):
-    """Train every config in ``configs`` and return {variant_name: artefacts}.
-
-    When output_root is given, each run's files are written under
-    output_root/{lstm or rnn}/ so the layout matches models/lstm/ and
-    models/rnn/ from the spec.
-    """
     results = {}
     for config in configs:
         out_dir = None
