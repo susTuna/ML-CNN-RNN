@@ -264,7 +264,7 @@ class ImageCaptionerScratch:
 
             if token == self.end_id:
                 break
-            if token != self.pad_id:
+            if token not in (self.pad_id, self.start_id):
                 generated.append(token)
 
         # Step 8: decode
