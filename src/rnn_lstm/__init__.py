@@ -54,7 +54,7 @@ from .evaluate import (
 )
 
 __all__ = [
-    # scratch layers (Dev B)
+    # scratch layers (13523147)
     "EmbeddingLayer",
     "SimpleRNNCell",
     "SimpleRNNLayer",
@@ -63,7 +63,7 @@ __all__ = [
     "ImageCaptionerScratch",
     "beam_search_decode",
     "beam_search_batch",
-    # caption preprocessing (Dev C)
+    # caption preprocessing (13523150)
     "PAD_ID",
     "START_ID",
     "END_ID",

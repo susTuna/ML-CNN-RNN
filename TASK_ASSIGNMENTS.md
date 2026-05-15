@@ -11,9 +11,9 @@
 
 | Anggota | Domain Utama | File Utama |
 |---------|-------------|------------|
-| **Dev A** | CNN — layers from scratch, training, evaluasi, Grad-CAM bonus | `src/cnn/conv2d.py`, `src/cnn/locally_connected.py`, `src/cnn/pooling.py`, `src/cnn/flatten.py`, `src/cnn/scratch_model.py`, `src/cnn/model.py`, `src/cnn/train.py`, `src/shared/` |
-| **Dev B** | RNN/LSTM — layers from scratch, decoder, beam search bonus | `src/rnn_lstm/embedding.py`, `src/rnn_lstm/rnn.py`, `src/rnn_lstm/lstm.py`, `src/rnn_lstm/decoder.py`, `src/rnn_lstm/beam_search.py` |
-| **Dev C** | RNN/LSTM — training pipeline, caption preprocessing, evaluasi, laporan | `src/rnn_lstm/caption_preprocessing.py`, `src/rnn_lstm/model.py`, `src/rnn_lstm/model_init_inject.py`, `src/rnn_lstm/train.py`, `src/rnn_lstm/metrics.py`, `src/rnn_lstm/evaluate.py`, `doc/` |
+| **13523134** | CNN — layers from scratch, training, evaluasi, Grad-CAM bonus | `src/cnn/conv2d.py`, `src/cnn/locally_connected.py`, `src/cnn/pooling.py`, `src/cnn/flatten.py`, `src/cnn/scratch_model.py`, `src/cnn/model.py`, `src/cnn/train.py`, `src/shared/` |
+| **13523147** | RNN/LSTM — layers from scratch, decoder, beam search bonus | `src/rnn_lstm/embedding.py`, `src/rnn_lstm/rnn.py`, `src/rnn_lstm/lstm.py`, `src/rnn_lstm/decoder.py`, `src/rnn_lstm/beam_search.py` |
+| **13523150** | RNN/LSTM — training pipeline, caption preprocessing, evaluasi, laporan | `src/rnn_lstm/caption_preprocessing.py`, `src/rnn_lstm/model.py`, `src/rnn_lstm/model_init_inject.py`, `src/rnn_lstm/train.py`, `src/rnn_lstm/metrics.py`, `src/rnn_lstm/evaluate.py`, `doc/` |
 
 > **Shared responsibilities:** `src/shared/` dikerjakan bersama di hari 1-2 sebagai fondasi bersama. Backward propagation bonus dibagi rata setelah forward propagation selesai.
 
@@ -35,13 +35,13 @@ src/notebooks/notebook.ipynb
   §8  RNN/LSTM — Beam Search / Init-Inject [Bonus]
 ```
 
-Dev A mengerjakan §1–4, Dev B membantu §7–8 (scratch inference), Dev C mengerjakan §5–7 (training & evaluasi).
+13523134 mengerjakan §1–4, 13523147 membantu §7–8 (scratch inference), 13523150 mengerjakan §5–7 (training & evaluasi).
 
 ---
 
 ---
 
-# DEV A — CNN Specialist
+# 13523134 — CNN Specialist
 
 ## Tanggung Jawab Utama
 
@@ -51,7 +51,7 @@ Seluruh bagian CNN: utility functions, implementasi from scratch, training Keras
 
 ## [SHARED — Hari 1] Setup Bersama
 
-Kerjakan bersama Dev B dan Dev C:
+Kerjakan bersama 13523147 dan 13523150:
 
 **`src/shared/image_utils.py`**
 - `load_image(path, target_size) -> np.ndarray` — PIL load, resize, normalize ke [0,1]
@@ -92,8 +92,8 @@ Kerjakan bersama Dev B dan Dev C:
 > ├── scratch_model.py      ← CNNScratchModel
 > ├── layers.py             ← shim: re-export semua kelas di atas
 > ├── __init__.py           ← re-export package-level
-> ├── model.py              ← Keras training model (DEV A Bagian 3)
-> ├── train.py              ← training pipeline (DEV A Bagian 3)
+> ├── model.py              ← Keras training model (13523134 Bagian 3)
+> ├── train.py              ← training pipeline (13523134 Bagian 3)
 > └── gradcam.py            ← Grad-CAM [BONUS]
 > ```
 > `layers.py` hanya berisi `from .conv2d import ...` dst.
@@ -174,7 +174,7 @@ Simpan semua bobot ke `models/cnn/`, catat macro F1 dan training history `.json`
 
 ---
 
-## Output Dev A
+## Output 13523134
 ```
 src/shared/image_utils.py
 src/shared/activations.py
@@ -200,7 +200,7 @@ notebook.ipynb §1, §2, §3, §4
 
 ---
 
-# DEV B — RNN/LSTM From-Scratch & Decoder Specialist
+# 13523147 — RNN/LSTM From-Scratch & Decoder Specialist
 
 ## Tanggung Jawab Utama
 
@@ -210,7 +210,7 @@ Implementasi from scratch semua layer RNN/LSTM, decoder inference pipeline (gree
 
 ## [SHARED — Hari 1] Setup Bersama
 
-Sama dengan Dev A — kerjakan `src/shared/` bersama.
+Sama dengan 13523134 — kerjakan `src/shared/` bersama.
 
 ---
 
@@ -324,7 +324,7 @@ ImageCaptionerScratch.generate_caption(image_path, max_len):
 
 ---
 
-## Output Dev B
+## Output 13523147
 ```
 src/rnn_lstm/embedding.py            (EmbeddingLayer)
 src/rnn_lstm/rnn.py                  (SimpleRNNCell, SimpleRNNLayer)
@@ -333,14 +333,14 @@ src/rnn_lstm/layers.py              ← shim re-export (backward compat)
 src/rnn_lstm/__init__.py             (package-level re-exports)
 src/rnn_lstm/decoder.py              (ImageCaptionerScratch, greedy decode)
 src/rnn_lstm/beam_search.py          [BONUS]
-notebook.ipynb §7, §8               (bersama Dev C)
+notebook.ipynb §7, §8               (bersama 13523150)
 ```
 
 ---
 
 ---
 
-# DEV C — RNN/LSTM Training, Evaluation & Laporan
+# 13523150 — RNN/LSTM Training, Evaluation & Laporan
 
 ## Tanggung Jawab Utama
 
@@ -350,13 +350,13 @@ Caption preprocessing, Keras training pipeline, evaluasi (BLEU/METEOR), eksperim
 
 ## [SHARED — Hari 1] Setup Bersama
 
-Sama dengan Dev A dan Dev B.
+Sama dengan 13523134 dan 13523147.
 
 ---
 
 ## [RNN/LSTM Bagian 1] Feature Extraction
 **Notebook:** `§5 RNN/LSTM — Feature Extraction + Caption Preprocessing`  
-Bergantung pada `extract_and_save_features` dari Dev A.
+Bergantung pada `extract_and_save_features` dari 13523134.
 
 - [ ] Jalankan extraction seluruh Flickr8k (8.092 gambar) dengan InceptionV3 atau VGG16 tanpa top layer, bobot ImageNet, frozen
 - [ ] Simpan ke `data/flickr8k/features/features.npy` (shape: `(8092, feature_dim)`)
@@ -413,14 +413,14 @@ Minimal 6 variasi × 2 decoder = 12 training runs.
 
 ## [RNN/LSTM Bagian 5] Eksperimen & Evaluasi
 **File:** `src/rnn_lstm/metrics.py`, `src/rnn_lstm/evaluate.py`  
-**Notebook:** `§7 RNN/LSTM — From Scratch & Evaluation` (bersama Dev B)
+**Notebook:** `§7 RNN/LSTM — From Scratch & Evaluation` (bersama 13523147)
 
 ### `metrics.py` — Pure Metric Functions
 - [ ] `compute_bleu4(references, hypotheses)` — gunakan `sacrebleu` atau `nltk`
 - [ ] `compute_meteor(references, hypotheses)` — gunakan `nltk.translate.meteor_score`
 
 ### `evaluate.py` — Evaluation Orchestration
-Menggunakan `metrics.py` + `decoder.py` dari Dev B.
+Menggunakan `metrics.py` + `decoder.py` dari 13523147.
 
 ### Eksperimen
 
@@ -432,7 +432,7 @@ Menggunakan `metrics.py` + `decoder.py` dari Dev B.
 **b) Keras vs From Scratch:**
 - [ ] Pilih 1 variasi terbaik per decoder
 - [ ] Keras inference → catat BLEU-4 dan inference time
-- [ ] Scratch inference (dari Dev B) → catat BLEU-4 dan inference time
+- [ ] Scratch inference (dari 13523147) → catat BLEU-4 dan inference time
 - [ ] Analisis perbedaan
 
 **c) RNN vs LSTM:**
@@ -472,7 +472,7 @@ Menggunakan `metrics.py` + `decoder.py` dari Dev B.
 
 ---
 
-## Output Dev C
+## Output 13523150
 ```
 src/rnn_lstm/caption_preprocessing.py  (preprocess_captions, build_vocabulary, tokenize_and_pad)
 src/rnn_lstm/model.py                  (build_decoder_pre_inject)
@@ -484,7 +484,7 @@ models/rnn/*.weights.h5                (6+ model files)
 models/lstm/*.weights.h5               (6+ model files)
 outputs/rnn/, outputs/lstm/            (plots, BLEU tables, caption examples)
 doc/laporan.pdf
-notebook.ipynb §5, §6, §7             (bersama Dev B untuk §7)
+notebook.ipynb §5, §6, §7             (bersama 13523147 untuk §7)
 ```
 
 ---
@@ -495,11 +495,11 @@ notebook.ipynb §5, §6, §7             (bersama Dev B untuk §7)
 
 | Hari | Tanggal | Milestone |
 |------|---------|-----------|
-| 1–2 | 5–6 Mei | Setup repo + shared utilities selesai. Dev A mulai CNN layers. Dev B mulai RNN/LSTM layers. Dev C setup dataset + caption preprocessing. |
-| 3–4 | 7–8 Mei | Dev A: CNN from scratch done. Dev B: EmbeddingLayer + LSTMCell done. Dev C: feature extraction + preprocessing selesai. |
-| 5–6 | 9–10 Mei | Dev A: CNN training sweep selesai. Dev B: greedy decoder + beam search done. Dev C: 12 training runs selesai. |
-| 7–8 | 11–12 Mei | Dev A: evaluasi + Grad-CAM. Dev B: batch inference done. Dev C: evaluasi BLEU/METEOR + semua eksperimen. |
-| 9–10 | 13–14 Mei | Dev A+B: backward propagation. Dev C: laporan draft. Review bersama + merge notebook. |
+| 1–2 | 5–6 Mei | Setup repo + shared utilities selesai. 13523134 mulai CNN layers. 13523147 mulai RNN/LSTM layers. 13523150 setup dataset + caption preprocessing. |
+| 3–4 | 7–8 Mei | 13523134: CNN from scratch done. 13523147: EmbeddingLayer + LSTMCell done. 13523150: feature extraction + preprocessing selesai. |
+| 5–6 | 9–10 Mei | 13523134: CNN training sweep selesai. 13523147: greedy decoder + beam search done. 13523150: 12 training runs selesai. |
+| 7–8 | 11–12 Mei | 13523134: evaluasi + Grad-CAM. 13523147: batch inference done. 13523150: evaluasi BLEU/METEOR + semua eksperimen. |
+| 9–10 | 13–14 Mei | 13523134+B: backward propagation. 13523150: laporan draft. Review bersama + merge notebook. |
 | 11 | 15 Mei | Final check + submission via Edunex (NIM terkecil). |
 
 ---
@@ -536,25 +536,25 @@ rnn_lstm/evaluate.py ───────────────→ notebook �
 
 # Interface Contracts (antar Dev)
 
-### Dev A → Dev B & C: `extract_and_save_features`
+### 13523134 → 13523147 & C: `extract_and_save_features`
 ```
 Output .npy shape: (N_images, feature_dim)
 Output index_map.json: {"filename.jpg": 0, ...}
 ```
 
-### Dev A → Dev B: `CNNScratchModel`
+### 13523134 → 13523147: `CNNScratchModel`
 ```
 model.forward(x)  → x shape (H,W,C) atau (N,H,W,C) [batch BONUS]
 Returns: np.ndarray logits
 ```
 
-### Dev B → Dev C: `ImageCaptionerScratch`
+### 13523147 → 13523150: `ImageCaptionerScratch`
 ```
 captioner.generate_caption(image_path, max_len) -> str
 captioner.generate_captions(image_paths, max_len) -> List[str]
 ```
 
-### Dev C → Dev B: Model weight files
+### 13523150 → 13523147: Model weight files
 ```
 models/lstm/variant_name.weights.h5
 models/rnn/variant_name.weights.h5

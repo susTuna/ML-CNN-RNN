@@ -66,7 +66,24 @@ Download datasets:
 
 ## How to Run
 
-TODO: Fill this section
+1. **Install dependencies:**
+   ```bash
+   uv sync
+   ```
+
+2. **Download the datasets** into `data/`:
+   - Intel Image Classification → `data/intel/seg_train/seg_train/<class>/` and `data/intel/seg_test/seg_test/<class>/`
+   - Flickr8k → `data/flickr8k/images/` (JPGs), plus the split files `Flickr_8k.trainImages.txt`, `Flickr_8k.devImages.txt`, `Flickr_8k.testImages.txt`, and the caption file `Flickr8k.token.txt` in `data/flickr8k/`.
+
+3. **Run the experiments:** open `src/notebooks/notebook.ipynb` in Jupyter and run all cells. The notebook covers all 8 sections:
+   - §1 setup, §2 CNN training sweep (16 variants), §3 Keras vs scratch CNN comparison, §4 Grad-CAM (bonus),
+   - §5 feature extraction + caption preprocessing, §6 RNN/LSTM training sweep (12 variants), §7 evaluation (BLEU-4/METEOR, Keras vs scratch, max_len sweep), §8 beam search + init-inject (bonus).
+   Weights are written to `models/`, evaluation tables and plots to `outputs/`.
+
+4. **Tests:**
+   ```bash
+   python -m pytest tests/
+   ```
 
 ---
 
