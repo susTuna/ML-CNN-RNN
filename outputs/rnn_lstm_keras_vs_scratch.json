@@ -1,0 +1,34 @@
+{
+  "lstm_keras": {
+    "variant": "pre_inject_lstm_l2_h512_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.15217236299799197,
+    "meteor": 0.3534038363789836,
+    "elapsed_seconds": 476.0595874786377,
+    "num_samples": 810
+  },
+  "lstm_scratch": {
+    "variant": "pre_inject_lstm_l2_h512_e256_scratch",
+    "decoder_kind": "scratch",
+    "bleu4": 0.15217236299799197,
+    "meteor": 0.3534038363789836,
+    "elapsed_seconds": 24.24315118789673,
+    "num_samples": 810
+  },
+  "rnn_keras": {
+    "variant": "pre_inject_rnn_l3_h512_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.13896498835799684,
+    "meteor": 0.33404904302713795,
+    "elapsed_seconds": 533.8717949390411,
+    "num_samples": 810
+  },
+  "rnn_scratch": {
+    "variant": "pre_inject_rnn_l3_h512_e256_scratch",
+    "decoder_kind": "scratch",
+    "bleu4": 0.1390014527352426,
+    "meteor": 0.334058665461854,
+    "elapsed_seconds": 11.880263090133667,
+    "num_samples": 810
+  }
+}

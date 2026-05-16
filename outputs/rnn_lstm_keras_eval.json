@@ -1,1 +1,98 @@
-[]
+[
+  {
+    "variant": "pre_inject_lstm_l1_h128_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.11503617120452003,
+    "meteor": 0.3206719725162046,
+    "elapsed_seconds": 540.2114927768707,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_lstm_l1_h512_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.13097455195944815,
+    "meteor": 0.3453175167135571,
+    "elapsed_seconds": 481.85094475746155,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_lstm_l2_h128_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.12344090803027495,
+    "meteor": 0.3273738706052046,
+    "elapsed_seconds": 539.7062275409698,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_lstm_l2_h512_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.15217236299799197,
+    "meteor": 0.3534038363789836,
+    "elapsed_seconds": 476.0595874786377,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_lstm_l3_h128_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.10978560331385315,
+    "meteor": 0.31961610752118547,
+    "elapsed_seconds": 602.7822408676147,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_lstm_l3_h512_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.14019360850218435,
+    "meteor": 0.3532135932808404,
+    "elapsed_seconds": 536.0000536441803,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_rnn_l1_h128_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.09203084455069722,
+    "meteor": 0.29294799699856006,
+    "elapsed_seconds": 543.7280585765839,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_rnn_l1_h512_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.12225824539183808,
+    "meteor": 0.3265784196686808,
+    "elapsed_seconds": 516.4222264289856,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_rnn_l2_h128_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.09376322162062936,
+    "meteor": 0.29610470654805127,
+    "elapsed_seconds": 565.7795951366425,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_rnn_l2_h512_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.13504770293681642,
+    "meteor": 0.3308561937499243,
+    "elapsed_seconds": 498.1819233894348,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_rnn_l3_h128_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.10355759853540066,
+    "meteor": 0.3102702855214547,
+    "elapsed_seconds": 526.1975817680359,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_rnn_l3_h512_e256",
+    "decoder_kind": "keras",
+    "bleu4": 0.13896498835799684,
+    "meteor": 0.33404904302713795,
+    "elapsed_seconds": 533.8717949390411,
+    "num_samples": 810
+  }
+]

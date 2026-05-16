@@ -1,0 +1,26 @@
+[
+  {
+    "variant": "pre_inject_lstm_l2_h512_e256_L10",
+    "decoder_kind": "scratch",
+    "bleu4": 0.16572706891480055,
+    "meteor": 0.34310113028228767,
+    "elapsed_seconds": 19.611282348632812,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_lstm_l2_h512_e256_L20",
+    "decoder_kind": "scratch",
+    "bleu4": 0.15217236299799197,
+    "meteor": 0.3534038363789836,
+    "elapsed_seconds": 16.82587742805481,
+    "num_samples": 810
+  },
+  {
+    "variant": "pre_inject_lstm_l2_h512_e256_L35",
+    "decoder_kind": "scratch",
+    "bleu4": 0.1519935083601349,
+    "meteor": 0.3535576546029589,
+    "elapsed_seconds": 18.59933590888977,
+    "num_samples": 810
+  }
+]

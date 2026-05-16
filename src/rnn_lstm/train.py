@@ -329,6 +329,27 @@ def train_grid(
                 subdir = "rnn"
             out_dir = Path(output_root) / subdir
 
+        variant = config.variant_name()
+        
+        if out_dir is not None:
+            history_path = out_dir / (variant + "_history.json")
+            config_path = out_dir / (variant + "_config.json")
+            if history_path.exists() and config_path.exists():
+                print(f"Resuming {variant} - already trained.")
+                with open(history_path, "r", encoding="utf-8") as f:
+                    payload = json.load(f)
+                with open(config_path, "r", encoding="utf-8") as f:
+                    summary_payload = json.load(f)
+                    
+                results[variant] = {
+                    "variant": variant,
+                    "history": payload["history"],
+                    "elapsed_seconds": payload.get("elapsed_seconds", 0),
+                    "config": payload["config"],
+                    "summary": summary_payload,
+                }
+                continue
+
         artefacts = train_decoder_config(
             config,
             train_features=train_features,
@@ -341,7 +362,7 @@ def train_grid(
             output_dir=out_dir,
             verbose=verbose,
         )
-        results[config.variant_name()] = artefacts
+        results[variant] = artefacts
 
     return results
 

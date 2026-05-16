@@ -24,8 +24,11 @@ def elu(x, alpha=1.0):
 
 def sigmoid(x):
     """Sigmoid activation"""
-    x_clipped = np.clip(x, -500, 500)
-    return 1 / (1 + np.exp(-x_clipped))
+    return np.where(
+        x >= 0,
+        1 / (1 + np.exp(-np.clip(x, -np.inf, 88.7))),
+        np.exp(np.clip(x, -88.7, np.inf)) / (1 + np.exp(np.clip(x, -88.7, np.inf)))
+    )
 
 
 def tanh(x):

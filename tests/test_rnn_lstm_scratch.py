@@ -102,7 +102,7 @@ import unittest.mock as mock
 
 _PATCH_TARGET = "src.rnn_lstm.decoder.load_image"
 
-# Part 1 — Unit tests for individual layers
+# Part 1 - Unit tests for individual layers
 
 class TestEmbeddingLayer:
     def setup_method(self):
@@ -264,7 +264,7 @@ class TestLSTMLayer:
         out = self.layer_last.forward(seq)
         assert out.shape == (4, HIDDEN_DIM)
 
-# Part 2 — ImageCaptionerScratch (manual construction, no Keras)
+# Part 2 - ImageCaptionerScratch (manual construction, no Keras)
 
 def _build_captioner(rnn_type="lstm"):
     """Build an ImageCaptionerScratch with random weights, fake CNN encoder."""
@@ -347,7 +347,7 @@ class TestImageCaptionerScratch:
         assert "lstm" in r
         assert "vocab_size" in r
 
-# Part 3 — Beam Search
+# Part 3 - Beam Search
 
 class TestBeamSearch:
     @pytest.mark.parametrize("k", [1, 3, 5])
@@ -380,7 +380,7 @@ class TestBeamSearch:
             caption = beam_search_decode(captioner, "fake.jpg", k=3, max_len=10)
         assert isinstance(caption, str)
 
-# Part 4 — Numerical gradient check (finite differences vs backward)
+# Part 4 - Numerical gradient check (finite differences vs backward)
 
 class TestNumericalGradients:
     """

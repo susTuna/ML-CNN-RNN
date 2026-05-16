@@ -93,7 +93,7 @@ class CNNScratchModel:
                     current_shape = ((H - kH) // sH + 1, (W - kW) // sW + 1)
                 new_model.layers.append(lc)
             else:
-                # Build lazily — spatial dims determined at first forward call
+                # Build lazily - spatial dims determined at first forward call
                 new_model.layers.append(
                     _LazyLocallyConnectedLayer(
                         conv_layer=layer,

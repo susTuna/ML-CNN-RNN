@@ -1,0 +1,246 @@
+{
+  "lstm": [
+    {
+      "image_id": "3455920874_6fbec43194.jpg",
+      "score": 0.9036020036098448,
+      "prediction": "a black and white dog jumps over a hurdle",
+      "references": [
+        "a black and white dog in midair over a hurdle",
+        "a black and white dog is jumping over a fence in an obstacle course",
+        "a black and white dog jumps a red and white hurdle on a lawn with other dogs and people",
+        "a dog jumps over a red and white gate",
+        "the dog jumps over an obstacle"
+      ]
+    },
+    {
+      "image_id": "3701249979_8bc757e171.jpg",
+      "score": 0.015276780223747026,
+      "prediction": "a young girl wearing a pink shirt and a girl in a red dress runs through a field",
+      "references": [
+        "two children carry flowers as they walk along a grassy track",
+        "two children hold hands and flowers",
+        "two children in jackets walking down a dirt road carrying flowers",
+        "two children walk along a path holding purple flowers",
+        "two girl walk town a dirt road holding flowers"
+      ]
+    },
+    {
+      "image_id": "3279025792_23bfd21bcc.jpg",
+      "score": 1.0,
+      "prediction": "a black dog is running through the snow",
+      "references": [
+        "a black dog is running through the snow",
+        "a black labrador bounds across the snow",
+        "a little black dog is running on the snow",
+        "a small black dog runs through the white snow",
+        "the black dog is running through the snow"
+      ]
+    },
+    {
+      "image_id": "1525153022_06c48dbe52.jpg",
+      "score": 1.0,
+      "prediction": "a black dog is running through the water",
+      "references": [
+        "a black dog is running through the shallow edge of a large body of water",
+        "a black dog is running through the water",
+        "a black dog jumps high out of the water",
+        "a black and tan dobbermen running through the ocean",
+        "the dog runs through the water"
+      ]
+    },
+    {
+      "image_id": "1473618073_7db56a5237.jpg",
+      "score": 0.07730551756939454,
+      "prediction": "two children swing on a tire swing",
+      "references": [
+        "a boy on a green plastic swing",
+        "a little boy sitting on a green swing",
+        "a smiling boy plays on a green plastic swing toy",
+        "boy swinging on a swing set",
+        "little boy riding on green swing in a playground"
+      ]
+    },
+    {
+      "image_id": "399679638_d3036da331.jpg",
+      "score": 1.0,
+      "prediction": "two dogs playing in the snow",
+      "references": [
+        "a brown dog and a gray dog are playing in the snow",
+        "dogs play in the snow",
+        "two dogs are wrestling on the ground in the snow",
+        "two dogs playing in the snow",
+        "two dogs play in the snow"
+      ]
+    },
+    {
+      "image_id": "2876994989_a4ebbd8491.jpg",
+      "score": 0.014400124446705301,
+      "prediction": "a man with a beard and a woman in a suit print shirt and a woman in a black suit",
+      "references": [
+        "a football fan showing his devotion by painting his face",
+        "a person with face paint is staring at something from within a crowd",
+        "a sports fan is wearing face paint in the stands",
+        "nfl fan with their face painted white blue and yellow",
+        "the person with the face paint and football jersey is sitting in bleachers"
+      ]
+    },
+    {
+      "image_id": "1572286502_64e5c4b920.jpg",
+      "score": 0.07730551756939454,
+      "prediction": "two children are playing on a swing",
+      "references": [
+        "a blonde child climbing across a net",
+        "a child is playing at a park",
+        "a girls climbs on a jungle gym",
+        "a small child climbing on an elevated net",
+        "a young child climbs on a rope net"
+      ]
+    },
+    {
+      "image_id": "3467219837_7d62213dec.jpg",
+      "score": 0.07730551756939454,
+      "prediction": "three dogs are running on the beach",
+      "references": [
+        "a dog with a muzzle is leading several other dogs in a race",
+        "a greyhound leaps in a race",
+        "a muzzled dog in a race with four dogs following",
+        "five dogs are racing",
+        "five dogs are racing on a dirt track"
+      ]
+    },
+    {
+      "image_id": "2301867590_98c0ecb0cb.jpg",
+      "score": 0.0,
+      "prediction": "a woman skiing down a snowy hill",
+      "references": [
+        "the children make snow angels next to each other",
+        "two children are making snow angels",
+        "two children lying in the snow making snow angels",
+        "two children one in red and one in blue making snow angels",
+        "two people in snowsuits laying in the snow making snow angels"
+      ]
+    }
+  ],
+  "rnn": [
+    {
+      "image_id": "2637904605_fc355816fc.jpg",
+      "score": 1.0,
+      "prediction": "a black and white dog is running through the grass",
+      "references": [
+        "a black and white dog bounds through a field",
+        "a black and white dog bounds through tall wheat grass",
+        "a black and white dog is running through the grass",
+        "a white and black dog leaps through long grass in a field",
+        "the dog is running through a field"
+      ]
+    },
+    {
+      "image_id": "3279025792_23bfd21bcc.jpg",
+      "score": 1.0,
+      "prediction": "a black dog is running through the snow",
+      "references": [
+        "a black dog is running through the snow",
+        "a black labrador bounds across the snow",
+        "a little black dog is running on the snow",
+        "a small black dog runs through the white snow",
+        "the black dog is running through the snow"
+      ]
+    },
+    {
+      "image_id": "1525153022_06c48dbe52.jpg",
+      "score": 1.0,
+      "prediction": "a black dog is running through the water",
+      "references": [
+        "a black dog is running through the shallow edge of a large body of water",
+        "a black dog is running through the water",
+        "a black dog jumps high out of the water",
+        "a black and tan dobbermen running through the ocean",
+        "the dog runs through the water"
+      ]
+    },
+    {
+      "image_id": "2595102568_347f6d4b07.jpg",
+      "score": 0.06568934426718102,
+      "prediction": "a man and a woman are sitting on a bench",
+      "references": [
+        "a groupe of three walk the street",
+        "a man woman and child stand outside looking serious and waiting for something",
+        "an asian man woman and child are standing on a sidewalk",
+        "three asian people standing on a sidewalk with a street scene in the background",
+        "three asian people wait on the sidewalk"
+      ]
+    },
+    {
+      "image_id": "2490179961_e842fda5eb.jpg",
+      "score": 0.01428363257865929,
+      "prediction": "a woman in a blue shirt and a leather jacket smiles at the camera",
+      "references": [
+        "two children with chocolate around their mouths are pulling funny faces",
+        "two girls are making funny faces and one has food smeared on her face around her mouth",
+        "two girls with chocolate mouths",
+        "two little brown haired girls are grinning and squinting their eyes",
+        "two little girls one with chocolate on her face make faces"
+      ]
+    },
+    {
+      "image_id": "2389107995_ec756f3514.jpg",
+      "score": 0.8408964152537145,
+      "prediction": "a black dog is swimming in the water",
+      "references": [
+        "a black dog swimming through a river",
+        "a black dog swims through the water",
+        "black dog swimming in water",
+        "the black dog gets soaked as it plays in the water",
+        "the dog is swimming in the water"
+      ]
+    },
+    {
+      "image_id": "2867968184_908d87cf2c.jpg",
+      "score": 0.0660505863531234,
+      "prediction": "a skateboarder is doing a jump off a ramp",
+      "references": [
+        "a man doing a skateboard trick in air while being videotaped",
+        "a man performs a skateboard trick",
+        "a teenager boy does a trick with his skateboard against a wall",
+        "the boy is skateboarding",
+        "the skateboarder wearing jeans and a white shirt jumps a ramp"
+      ]
+    },
+    {
+      "image_id": "2942798367_022df04b49.jpg",
+      "score": 0.01428363257865929,
+      "prediction": "a man in a blue shirt is standing by a man in a wheelchair",
+      "references": [
+        "two children are on a fairground ride",
+        "two girls on a carnival ride",
+        "two girls on an amusement park ride",
+        "two girls on an amusement park ride smiling and laughing",
+        "two girls riding on an amusement part ride"
+      ]
+    },
+    {
+      "image_id": "3217266166_4e0091860b.jpg",
+      "score": 0.01553712569276035,
+      "prediction": "a man in a blue shirt is riding a bike on a ramp",
+      "references": [
+        "children play with large hoops",
+        "little kids playing with sparklers at night",
+        "two small children are twirling sparkling rope",
+        "two young boys playing with sparklers",
+        "two young children and an older man play with sparklers"
+      ]
+    },
+    {
+      "image_id": "513269597_c38308feaf.jpg",
+      "score": 0.06674094719041482,
+      "prediction": "a black and white dog is running through a field",
+      "references": [
+        "a black dog carries a bucket in its mouth",
+        "a black dog carrying a hanging flower pot",
+        "a dog next to pine tree biting on a bucket",
+        "a furry black dog in a backyard carrying a basket in its mouth",
+        "a furry dog is walking by green trees while carrying something in its mouth"
+      ]
+    }
+  ]
+}

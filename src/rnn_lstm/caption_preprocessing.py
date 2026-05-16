@@ -206,7 +206,7 @@ def prepare_dataset(
 
     if len(feats) == 0:
         raise ValueError(
-            "No (image, caption) pairs found — check that image_ids overlap "
+            "No (image, caption) pairs found - check that image_ids overlap "
             "with both captions_by_image and index_map."
         )
 
