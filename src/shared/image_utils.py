@@ -53,8 +53,29 @@ def extract_and_save_features(
     out_path: str | Path,
     index_map_path: str | Path | None = None,
     skip_if_exists: bool = True,
+    batch_size: int = 32,
+    progress: bool = True,
 ) -> np.ndarray:
+    """Extract CNN features with a frozen Keras encoder and persist them.
 
+    Parameters
+    ----------
+    paths:
+        Ordered iterable of image file paths.
+    keras_encoder:
+        Frozen Keras model used as feature extractor.
+    out_path:
+        Destination ``.npy`` file for the feature array ``(N, feature_dim)``.
+    index_map_path:
+        Optional path for a ``{filename: index}`` JSON mapping.
+    skip_if_exists:
+        When *True* (default) and ``out_path`` already exists, load and return
+        the cached array instead of re-running extraction.
+    batch_size:
+        Number of images per forward pass to keep memory bounded.
+    progress:
+        When *True* (default), print periodic progress updates.
+    """
     import json
 
     out_path = Path(out_path)
@@ -64,12 +85,22 @@ def extract_and_save_features(
         return np.load(out_path)
 
     target_size = _infer_target_size(keras_encoder)
-    batch = load_batch(paths, target_size)
 
-    if hasattr(keras_encoder, "predict"):
-        features = np.asarray(keras_encoder.predict(batch, verbose=0), dtype=np.float32)
-    else:
-        features = np.asarray(keras_encoder(batch), dtype=np.float32)
+    has_predict = hasattr(keras_encoder, "predict")
+    all_features = []
+    n = len(paths)
+    for start in range(0, n, batch_size):
+        chunk = paths[start : start + batch_size]
+        batch = load_batch(chunk, target_size)
+        if has_predict:
+            feats = np.asarray(keras_encoder.predict(batch, verbose=0), dtype=np.float32)
+        else:
+            feats = np.asarray(keras_encoder(batch), dtype=np.float32)
+        all_features.append(feats)
+        if progress and (start // batch_size) % 10 == 0:
+            print(f"  feature extraction: {min(start + batch_size, n)}/{n}", flush=True)
+
+    features = np.concatenate(all_features, axis=0) if all_features else np.empty((0, 0), dtype=np.float32)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     np.save(out_path, features)

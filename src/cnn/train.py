@@ -172,6 +172,44 @@ def train_cnn_config(
     return artefacts
 
 
+def _build_model_for_config(config):
+    pooling_arg = "max" if config.pooling_type == "max" else "average"
+    return build_cnn_model(
+        num_conv_layers=config.num_conv_layers,
+        filters_per_layer=config.filters_per_layer,
+        kernel_size=config.kernel_size,
+        pooling_type=pooling_arg,
+        input_shape=config.input_shape,
+        num_classes=config.num_classes,
+    )
+
+
+def _load_saved_artefacts(config, output_dir):
+    output_dir = Path(output_dir)
+    variant = config.variant_name()
+    weights_path = output_dir / (variant + ".weights.h5")
+    history_path = output_dir / (variant + "_history.json")
+    config_path = output_dir / (variant + "_config.json")
+
+    if not (weights_path.exists() and history_path.exists() and config_path.exists()):
+        return None
+
+    with open(history_path, "r", encoding="utf-8") as f:
+        payload = json.load(f)
+
+    model = _build_model_for_config(config)
+    model.load_weights(weights_path)
+
+    return {
+        "variant": variant,
+        "config": payload.get("config", config.to_dict()),
+        "history": payload.get("history", {}),
+        "elapsed_seconds": payload.get("elapsed_seconds"),
+        "test_macro_f1": payload.get("test_macro_f1"),
+        "model": model,
+    }
+
+
 def save_artefacts(artefacts, output_dir):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -211,12 +249,27 @@ def train_grid(
     test_ds=None,
     output_root=None,
     verbose=1,
+    skip_existing=True,
 ):
     results = {}
-    for config in configs:
+    total = len(configs)
+    for i, config in enumerate(configs, start=1):
         out_dir = None
         if output_root is not None:
             out_dir = Path(output_root)
+
+        variant = config.variant_name()
+        if skip_existing and out_dir is not None:
+            saved = _load_saved_artefacts(config, out_dir)
+            if saved is not None:
+                print(
+                    f"[{i}/{total}] Skipping {variant}; saved artefacts found.",
+                    flush=True,
+                )
+                results[variant] = saved
+                continue
+
+        print(f"[{i}/{total}] Training {variant}...", flush=True)
         artefacts = train_cnn_config(
             config,
             train_ds=train_ds,
@@ -225,5 +278,11 @@ def train_grid(
             output_dir=out_dir,
             verbose=verbose,
         )
-        results[config.variant_name()] = artefacts
+        print(
+            f"[{i}/{total}] Finished {variant} in "
+            f"{artefacts['elapsed_seconds'] / 60:.1f} min "
+            f"(test_macro_f1={artefacts['test_macro_f1']}).",
+            flush=True,
+        )
+        results[variant] = artefacts
     return results
