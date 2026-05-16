@@ -27,3 +27,6 @@ __pycache__/
 # OS Generated Files
 .DS_Store
 Thumbs.db
+
+# IPYNB
+.ipynb_checkpoints/

@@ -44,6 +44,7 @@ def build_decoder_pre_inject(
             return_sequences=True,
             dropout=dropout,
             recurrent_dropout=recurrent_dropout,
+            unroll=True,
             name=rnn_type + "_" + str(i + 1),
         )(x)
 

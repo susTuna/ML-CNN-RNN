@@ -44,7 +44,7 @@ class ImageCaptionerScratch:
         cnn_encoder,
         word2idx: Dict[str, int],
         idx2word: Dict[int, str],
-    ) -> 
+    ) -> 'ImageCaptionerScratch':
         try:
             import tensorflow as tf
         except ImportError as exc:

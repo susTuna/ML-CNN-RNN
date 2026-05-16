@@ -52,6 +52,7 @@ def build_decoder_init_inject(
                 return_sequences=True,
                 dropout=dropout,
                 recurrent_dropout=recurrent_dropout,
+                unroll=True,
                 name=rnn_type + "_" + str(i + 1),
             )(x, initial_state=[h0, c0])
         else:
@@ -60,6 +61,7 @@ def build_decoder_init_inject(
                 return_sequences=True,
                 dropout=dropout,
                 recurrent_dropout=recurrent_dropout,
+                unroll=True,
                 name=rnn_type + "_" + str(i + 1),
             )(x, initial_state=h0)
 

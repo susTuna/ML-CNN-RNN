@@ -57,17 +57,32 @@ def load_flickr8k_captions(captions_path):
     captions = {}
 
     with open(captions_path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            if "\t" not in line:
-                continue
-            image_part, caption = line.split("\t", 1)
-            image_filename = image_part.split("#", 1)[0]
-            if image_filename not in captions:
-                captions[image_filename] = []
-            captions[image_filename].append(caption)
+        first_line = f.readline().strip()
+        if first_line == "image,caption":
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                parts = line.split(",", 1)
+                if len(parts) != 2:
+                    continue
+                image_filename, caption = parts
+                if image_filename not in captions:
+                    captions[image_filename] = []
+                captions[image_filename].append(caption)
+        else:
+            f.seek(0)
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                if "\t" not in line:
+                    continue
+                image_part, caption = line.split("\t", 1)
+                image_filename = image_part.split("#", 1)[0]
+                if image_filename not in captions:
+                    captions[image_filename] = []
+                captions[image_filename].append(caption)
 
     return captions
 
@@ -200,3 +215,19 @@ def prepare_dataset(
     decoder_input, decoder_target = build_training_pairs(sequences)
 
     return feat_array, decoder_input, decoder_target
+
+
+def generate_splits(image_ids, train_ratio=0.8, val_ratio=0.1, seed=42):
+    np.random.seed(seed)
+    ids = list(image_ids)
+    np.random.shuffle(ids)
+    
+    n = len(ids)
+    n_train = int(n * train_ratio)
+    n_val = int(n * val_ratio)
+    
+    train_ids = ids[:n_train]
+    val_ids = ids[n_train:n_train+n_val]
+    test_ids = ids[n_train+n_val:]
+    
+    return train_ids, val_ids, test_ids

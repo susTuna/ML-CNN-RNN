@@ -112,7 +112,12 @@ def train_model(
         fit_options["batch_size"] = batch_size
     fit_options.update(fit_kwargs)
 
-    history = model.fit(train_data, **fit_options)
+    if isinstance(train_data, tuple) and len(train_data) == 2:
+        x_train, y_train = train_data
+        history = model.fit(x=x_train, y=y_train, **fit_options)
+    else:
+        history = model.fit(train_data, **fit_options)
+        
     history_dict = _history_to_dict(history)
 
     if output_dir is not None:
@@ -225,6 +230,15 @@ def train_decoder_config(
     if output_dir is not None:
         save_artefacts(artefacts, output_dir)
 
+    if "model" in artefacts:
+        del artefacts["model"]
+    del model
+    
+    import tensorflow as tf
+    import gc
+    tf.keras.backend.clear_session()
+    gc.collect()
+
     return artefacts
 
 
@@ -330,3 +344,22 @@ def train_grid(
         results[config.variant_name()] = artefacts
 
     return results
+
+
+def load_model_from_artefact(artefact, output_root, vocab_size, feat_dim, seq_len):
+    """Helper to rebuild a model from its artefact since the model object is no longer kept in memory."""
+    config_dict = artefact["config"]
+    # Reconstruct the config object
+    config = DecoderConfig(**config_dict)
+    
+    if config.rnn_type == "lstm":
+        subdir = "lstm"
+    else:
+        subdir = "rnn"
+        
+    out_dir = Path(output_root) / subdir
+    weights_path = out_dir / (config.variant_name() + ".weights.h5")
+    
+    model = _build_model(config, vocab_size=vocab_size, feat_dim=feat_dim, seq_len=seq_len)
+    model.load_weights(weights_path)
+    return model
