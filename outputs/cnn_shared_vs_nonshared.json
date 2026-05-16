@@ -1,0 +1,7 @@
+{
+  "shared_f1": 0.8569575701404606,
+  "shared_scratch_f1": 0.8569575701404606,
+  "shared_params": 1111750,
+  "nonshared_f1": 0.5890462763961076,
+  "nonshared_params": 16330246
+}
